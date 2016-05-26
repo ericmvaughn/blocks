@@ -1,0 +1,18 @@
+{
+  "name": "blocks",
+  "version": "1.0.0",
+  "description": "Test app to investigate the Hyperledger block chain.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eric Vaughn",
+  "dependencies": {
+    "atob": "^2.0.3",
+    "express": "^4.13.4",
+    "express-session": "^1.13.0",
+    "hlc-experimental": "0.0.1",
+    "ibm-blockchain-js": "^1.2.1",
+    "morgan": "^1.7.0"
+  }
+}
