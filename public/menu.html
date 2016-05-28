@@ -13,13 +13,22 @@
 
 
 <body>
-  <div class="container" >
-    <h1>Blockchain viewer</h1>
-
-    <div class="container" ng-controller="heightCtrl">
-      <p>The chain height {{height}}</p>
+  <div class="container-fluid" >
+    <div class="panel panel-default">
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-xs-8">
+            <h1>Blockchain viewer</h1>
+          </div>
+          <div class="col-xs-4">
+            <div  ng-controller="heightCtrl">
+              <h2>Chain height <span class="label label-default">{{height}}</h2>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="container" ng-controller="chainCtrl">
+    <div  ng-controller="chainCtrl">
       <p><a href='./chain'>Display the chain stats</a></p>
       <p>{{chainStats}}</p>
     </div>
