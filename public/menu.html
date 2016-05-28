@@ -16,10 +16,11 @@
   <div class="container" ng-controller="AppCtrl">
 
     <h1>Blockchain viewer</h1>
+    <p>The chain height {{chainStats.height}}</p>
     <p><a href='./chain'>Display the chain stats</a></p>
     <p>{{chainStats}}</p>
     <p><a href = './block/{{blockID}}'> Display block details </a> <input ng-model='blockID'></p>
-    <p><a href = './height'> Display the chain height </a></p>
+
     <p><a href = './payload/63'> Display the payload length </a></p>
     <p><a href = './all/blocks'> Display stats for all blocks </a></p>
   </div>
