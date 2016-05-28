@@ -4,16 +4,12 @@ var atob = require('atob');
 
 
 app.use(morgan('dev'));
+app.use(require('express').static(__dirname + '/public'));
 
 app.get('/', function(req, res){
   console.log('Display basic home page.');
-  var html = '<h1> Blockchain </h1>';
-  html += "<p><a href='./chain'>Display the chain stats</a></p>";
-  html += "<p><a href = './block/1'> Display block details </a></p>";
-  html += "<p><a href = './height'> Display the chain height </a></p>";
-  html += "<p><a href = './payload/63'> Display the payload length </a></p>";
-  html += "<p><a href = './all/blocks'> Display stats for all blocks </a></p>";
-  res.send(html);
+
+  res.send('./public/menu.html');
 });
 
 app.get('/chain', function(req, res){
