@@ -9,7 +9,7 @@ app.use(require('express').static(__dirname + '/public'));
 app.get('/', function(req, res){
   console.log('Display basic home page.');
 
-  res.send('./public/menu.html');
+  res.sendfile('./public/menu.html');  
 });
 
 app.get('/chain', function(req, res){
