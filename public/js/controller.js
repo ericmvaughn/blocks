@@ -13,9 +13,9 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
     getHeight();
   },1000);
   function getHeight(){
-    $http.get('./chain').success(function(response){
+    $http.get('./height').success(function(response){
       //console.log('got chain_stats');
-      $scope.height = response.height;
+      $scope.height = response;
       });
     };
     // Copied from the Angular documentation
