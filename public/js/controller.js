@@ -33,3 +33,24 @@ myApp.controller('blocksCtrl', ['$scope', '$http', function($scope, $http){
     $scope.blocks = response;
   });
 }]);
+
+myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
+  $http.get('./height').success(function(response){
+    $scope.blockID = response - 1;
+    getBlock($scope.blockID);
+    });
+
+
+  $scope.change = function() {
+    var id = $scope.blockID;
+    console.log("Get a block based on the blockID/" + id);
+    getBlock($scope.blockID);
+  };
+  function getBlock(id){
+    $http.get('./block/' + id).success(function(response){
+      console.log(response);
+      $scope.block = response;
+    });
+  };
+
+}]);

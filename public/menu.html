@@ -39,8 +39,15 @@
   </div>
 
   </div>
+  <div class="panel panel-default" ng-controller="blockCtrl">
+    <div class="panel-heading">
+      <h3 class="panel-title">Block Details <input ng-model='blockID' ng-change="change()"></h3>
+    </div>
+    <div class="panel-body">
+      {{block}}
+    </div>
+  </div>
 
-    <p><a href = './block/{{blockID}}'> Display block details </a> <input ng-model='blockID'></p>
 
 
     <h2 class="sub-header">Block List</h2>
