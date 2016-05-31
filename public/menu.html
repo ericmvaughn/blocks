@@ -55,7 +55,8 @@
       <table class="table table-striped">
         <thead>
           <tr>
-            <th># Transactions</th>
+            <th>Ledger Commit Time</th>
+            <th>Transactions</th>
             <th>Type</th>
             <th>Playload Length</th>
             <th>UUID</th>
@@ -64,6 +65,7 @@
         </thead>
         <tbody>
           <tr ng-repeat="block in blocks">
+            <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
             <td>{{block.transactions.length}}</td>
             <td>{{block.transactions[0].type}}</td>
             <td>{{block.transactions[0].payload.length}}</td>
