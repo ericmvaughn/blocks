@@ -25,3 +25,11 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
      $interval.cancel(stopUpdates);
    });
 }]);
+
+myApp.controller('blocksCtrl', ['$scope', '$http', function($scope, $http){
+  console.log("Get the last 10 blocks");
+  $http.get('./blocks/10').success(function(response){
+    console.log(response);
+    $scope.blocks = response;
+  });
+}]);

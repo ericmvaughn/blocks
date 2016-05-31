@@ -9,7 +9,7 @@ app.use(require('express').static(__dirname + '/public'));
 app.get('/', function(req, res){
   console.log('Display basic home page.');
 
-  res.sendfile('./public/menu.html');  
+  res.sendfile('./public/menu.html');
 });
 
 app.get('/chain', function(req, res){
@@ -60,7 +60,7 @@ app.get('/payload/:id', function(req, res){
 });
 
 app.get('/height', function(req, res){
-  console.log('Display the block height to the browser');
+  //console.log('Display the block height to the browser');
   res.send(chainHeight.toString());
 });
 
@@ -92,6 +92,31 @@ app.get('/all/blocks', function(req, res){
   }
   setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
     res.send(html);
+  }, 1000);
+});
+
+
+app.get('/blocks/:id', function(req, res){
+  console.log('build a list of n blocks');
+  //TODO  add some protection so i doesn't go negative
+  var blockList = [];
+  for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
+
+    ibc.block_stats(i, function(e, stats){
+      if (e != null) {
+          console.log('There was an error getting the block_stats:', e);
+          res.send('There was an error getting the block stats.  ');
+        }
+  		else {
+          //console.log('Adding another block to the list...');
+          blockList.push(stats);
+          }
+    });
+  }
+
+
+  setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
+    res.json(blockList);
   }, 1000);
 });
 
@@ -135,7 +160,7 @@ var options = 	{
 					network:{
 						peers: peers,
 						users: users,
-						options: {quiet: false, tls:false, maxRetry: 1}
+						options: {quiet: true, tls:false, maxRetry: 1}
 					},
 					chaincode:{
 						zip_url: 'https://github.com/ibm-blockchain/marbles-chaincode/archive/master.zip',

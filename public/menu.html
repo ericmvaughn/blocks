@@ -27,14 +27,48 @@
           </div>
         </div>
       </div>
-    </div>
+      <div class="panel-body">
+
     <div  ng-controller="chainCtrl">
-      <p><a href='./chain'>Display the chain stats</a></p>
-      <p>{{chainStats}}</p>
+      <h3>Chain Stats</h3>
+      <div class="row" ng-repeat="(key, value) in chainStats">
+       <div class="col-xs-2">{{key}}</div>
+       <div class="col-xs-6">{{value}}</div>
+     </div>
     </div>
+  </div>
+
+  </div>
+
     <p><a href = './block/{{blockID}}'> Display block details </a> <input ng-model='blockID'></p>
     <p><a href = './payload/63'> Display the payload length </a></p>
     <p><a href = './all/blocks'> Display stats for all blocks </a></p>
+
+    <h2 class="sub-header">Block List</h2>
+    <div class="table-responsive" ng-controller="blocksCtrl">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th># Transactions</th>
+            <th>Type</th>
+            <th>Playload Length</th>
+            <th>UUID</th>
+            <th>CC ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="block in blocks">
+            <td>{{block.transactions.length}}</td>
+            <td>{{block.transactions[0].type}}</td>
+            <td>{{block.transactions[0].payload.length}}</td>
+            <td>{{block.transactions[0].uuid}}</td>
+            <td>{{block.transactions[0].chaincodeID}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+
   </div>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.5/angular.min.js"> </script>
 <script src="./js/controller.js"></script>
