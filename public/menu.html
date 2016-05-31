@@ -67,8 +67,8 @@
             <td>{{block.transactions.length}}</td>
             <td>{{block.transactions[0].type}}</td>
             <td>{{block.transactions[0].payload.length}}</td>
-            <td>{{block.transactions[0].uuid}}</td>
-            <td>{{block.transactions[0].chaincodeID}}</td>
+            <td>{{block.transactions[0].uuid | limitTo:30}}</td>
+            <td>{{block.transactions[0].chaincodeID | limitTo:30}}</td>
           </tr>
         </tbody>
       </table>
