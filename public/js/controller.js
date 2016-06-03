@@ -11,7 +11,7 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
   getHeight();
   var stopUpdate = $interval(function(){
     getHeight();
-  },1000);
+  },10000);
   function getHeight(){
     $http.get('./height').success(function(response){
       //console.log('got chain_stats');
@@ -48,8 +48,9 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
   };
   function getBlock(id){
     $http.get('./block/' + id).success(function(response){
-      console.log(response);
-      $scope.block = response;
+      //console.log("print with JSON.stringify");
+      //$scope.block = JSON.stringify(response, null, 4);
+      $scope.block = angular.toJson(response, 4);
     });
   };
 
