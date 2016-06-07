@@ -27,7 +27,7 @@ app.get('/chain', function(req, res){
   });
 });
 
-app.get('/block/:id', function(req, res){
+app.get('/chain/block/:id', function(req, res){
   console.log('Display a list of the blocks');
   ibc.block_stats(req.params.id, function(e, stats){
     if (e != null) {
@@ -96,7 +96,7 @@ app.get('/all/blocks', function(req, res){
 });
 
 
-app.get('/blocks/:id', function(req, res){
+app.get('/chain/blocks/:id', function(req, res){
   console.log('build a list of n blocks');
   //TODO  add some protection so i doesn't go negative
   var blockList = [];

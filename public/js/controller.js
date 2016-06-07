@@ -1,7 +1,11 @@
 var myApp = angular.module('myApp', []);
+
+var baseUrl = 'http://localhost:5000';
+//var baseUrl = '.';
+
 myApp.controller('chainCtrl', ['$scope', '$http', function($scope, $http){
   console.log("Chain Controller");
-  $http.get('./chain').success(function(response){
+  $http.get(baseUrl + '/chain').success(function(response){
     console.log('got chain_stats');
     $scope.chainStats = response;
   });
@@ -13,9 +17,9 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
     getHeight();
   },10000);
   function getHeight(){
-    $http.get('./height').success(function(response){
+    $http.get(baseUrl + '/chain').success(function(response){
       //console.log('got chain_stats');
-      $scope.height = response;
+      $scope.height = response.height;
       });
     };
     // Copied from the Angular documentation
@@ -28,15 +32,15 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
 
 myApp.controller('blocksCtrl', ['$scope', '$http', function($scope, $http){
   console.log("Get the last 10 blocks");
-  $http.get('./blocks/10').success(function(response){
+  $http.get(baseUrl + '/chain/blocks/10').success(function(response){
     console.log(response);
     $scope.blocks = response;
   });
 }]);
 
 myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
-  $http.get('./height').success(function(response){
-    $scope.blockID = response - 1;
+  $http.get(baseUrl + '/chain').success(function(response){
+    $scope.blockID = response.height - 1;
     getBlock($scope.blockID);
     });
 
@@ -47,7 +51,7 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
     getBlock($scope.blockID);
   };
   function getBlock(id){
-    $http.get('./block/' + id).success(function(response){
+    $http.get(baseUrl + '/chain/blocks/' + id).success(function(response){
       //console.log("print with JSON.stringify");
       //$scope.block = JSON.stringify(response, null, 4);
       $scope.block = angular.toJson(response, 4);
