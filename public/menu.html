@@ -50,7 +50,7 @@
 
 
     <h2 class="sub-header">Block List</h2>
-    <div class="table-responsive" ng-controller="blocksCtrl">
+    <div class="table-responsive" ng-controller="blockListCtrl">
       <table class="table table-striped">
         <thead>
           <tr>
@@ -63,7 +63,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr ng-repeat="block in blocks">
+          <tr ng-repeat="block in blockList">
             <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
             <td>{{block.transactions.length}}</td>
             <td>{{block.transactions[0].type}}</td>

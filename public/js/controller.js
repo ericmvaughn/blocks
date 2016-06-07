@@ -30,13 +30,23 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
    });
 }]);
 
-myApp.controller('blocksCtrl', ['$scope', '$http', function($scope, $http){
+myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http){
   console.log("Get the last 10 blocks");
-  $http.get(baseUrl + '/chain/blocks/10').success(function(response){
-    console.log(response);
-    $scope.blocks = response;
-  });
-}]);
+  var chainHeight = 0;
+  $http.get(baseUrl + '/chain').success(function(response){
+    //console.log('got chain_stats');
+    chainHeight = response.height;
+
+    $scope.blockList = [];
+    for (var i = chainHeight - 1; i >= chainHeight - 10; i--){
+
+      $http.get(baseUrl + '/chain/blocks/' + i).success(function(response){
+        //console.log(response);
+        $scope.blockList.push(response);
+        });
+      };
+    });
+  }]);
 
 myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
   $http.get(baseUrl + '/chain').success(function(response){
