@@ -1,6 +1,14 @@
 var app = require('express')();
 var morgan = require('morgan');
 var atob = require('atob');
+var ProtoBuf = require("protobufjs");
+var ByteBuffer = require("bytebuffer");
+var hexy = require('hexy');
+
+
+var hexyFormat = {};
+    hexyFormat.width = 16; // how many bytes per line, default 16
+    hexyFormat.format = "twos";
 
 
 app.use(morgan('dev'));
@@ -41,8 +49,16 @@ app.get('/chain/blocks/:id', function(req, res){
   });
 });
 
-//provide payload details for block with id specified
 
+//provide payload details for block with id specified
+// var builder = ProtoBuf.loadProtoFile("./node_modules/hlc-experimental/protos/chaincode.proto"),    // Creates the Builder
+//     PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
+//var builder = ProtoBuf.loadProtoFile("./chaincode.proto"),    // Creates the Builder
+ var builder = ProtoBuf.loadProtoFile("./fabric.proto"),    // Creates the Builder
+     PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
+ // var bb = new ByteBuffer()
+ //             .writeIString("Hello world!")
+ //             .flip();
 app.get('/payload/:id', function(req, res){
   console.log('Display the payload for block id...');
   ibc.block_stats(req.params.id, function(e, stats){
@@ -51,10 +67,28 @@ app.get('/payload/:id', function(req, res){
         res.send('There was an error getting the block stats.  ');
       }
 		else {
-        console.log(stats);
-        console.log('payload in ascii encoding is ', stats.transactions[0].payload);
-        console.log('payload decoded with atob ', atob(stats.transactions[0].payload));
-        res.send('payload length ' + stats.transactions[0].payload.length.toString());
+        var data = atob(stats.transactions[0].payload);
+        console.log('test hexy on the payload');
+        console.log(hexy.hexy(data, hexyFormat));
+
+        // console.log('the raw payload is...')
+        // console.log(atob(stats.transactions[0].payload).toString('hex'));
+        try {
+          var payload = PROTOS.ChaincodeInvocationSpec.decode64(stats.transactions[0].payload);
+        } catch (e) {
+          if (e.decoded) { // Truncated
+            console.log('payload was truncated');
+             payload = e.decoded;
+           } else {  // General error
+             console.log('Protobuf decode failed ' + e);
+           }
+        }
+        console.log('payload is type ' + typeof payload);
+        console.log(payload.chaincodeSpec.ctorMsg);
+        // console.log('payload in ascii encoding is ', stats.transactions[0].payload);
+        // console.log('payload decoded with atob ', atob(stats.transactions[0].payload));
+        //res.send('payload length ' + stats.transactions[0].payload.length.toString());
+        res.json(payload);
         }
   });
 });
