@@ -1,7 +1,7 @@
 var myApp = angular.module('myApp', []);
 
-var baseUrl = 'http://localhost:5000';
-//var baseUrl = '.';
+//var baseUrl = 'http://localhost:5000';
+var baseUrl = '.';
 
 myApp.controller('chainCtrl', ['$scope', '$http', function($scope, $http){
   console.log("Chain Controller");
@@ -65,7 +65,40 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
       //console.log("print with JSON.stringify");
       //$scope.block = JSON.stringify(response, null, 4);
       $scope.block = angular.toJson(response, 4);
+      //$scope.payload = angular.toJson(atob(response.transactions[0].payload));
+      console.log(atob(response.transactions[0].payload));
+      $scope.payload = atob(response.transactions[0].payload);
     });
   };
 
+}]);
+
+
+
+myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
+  console.log('getting ready to do the $http.post');
+
+  var data = {
+          "jsonrpc": "2.0",
+          "method": "query",
+          "params": {
+            "type": 1,
+            "chaincodeID":{
+                "name":"mycc"
+            },
+            "ctorMsg": {
+               "function":"users",
+               "args":[]
+            }
+          },
+      "id": 5
+      };
+  $http.post(baseUrl + '/chaincode', data).then(function(response){
+    console.log(response);
+    if(response.data.result != null){
+      $scope.userList = angular.fromJson(response.data.result.message);
+    };
+  }, function(response){
+    console.log('an error happened on the $http.post')
+  });
 }]);
