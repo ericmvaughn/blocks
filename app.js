@@ -31,7 +31,8 @@ app.get('/chain', function(req, res){
       }
 		else {
         var output = JSON.stringify(stats, null, 4);
-        console.log('Got the block stats... ', output);
+        // console.log('Got the block stats... ', output);
+        console.log('Got the block stats... ');
         res.send(output);
         }
   });
@@ -45,7 +46,8 @@ app.get('/chain/blocks/:id', function(req, res){
         res.send('There was an error getting the block stats.  ');
       }
 		else {
-        console.log('Got the block stats... ', stats);
+        // console.log('Got the block stats... ', stats);
+        console.log('Got the block stats... ');
         res.json(stats);
         }
   });
@@ -62,9 +64,9 @@ app.get('/payload/:id', function(req, res){
         res.send('There was an error getting the block stats.  ');
       }
 		else {
-        var data = atob(stats.transactions[0].payload);
-        console.log('test hexy on the payload');
-        console.log(hexy.hexy(data, hexyFormat));
+        // var data = atob(stats.transactions[0].payload);
+        // console.log('test hexy on the payload');
+        // console.log(hexy.hexy(data, hexyFormat));
 
         try {
           var payload = PROTOS.ChaincodeInvocationSpec.decode64(stats.transactions[0].payload);
