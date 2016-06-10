@@ -48,6 +48,8 @@ app.get('/chain/blocks/:id', function(req, res){
 		else {
         // console.log('Got the block stats... ', stats);
         console.log('Got the block stats... ');
+        payload = decodePayload(stats);
+        stats.transactions[0].payload = payload;
         res.json(stats);
         }
   });
@@ -68,16 +70,8 @@ app.get('/payload/:id', function(req, res){
         // console.log('test hexy on the payload');
         // console.log(hexy.hexy(data, hexyFormat));
 
-        try {
-          var payload = PROTOS.ChaincodeInvocationSpec.decode64(stats.transactions[0].payload);
-        } catch (e) {
-          if (e.decoded) { // Truncated
-            console.log('payload was truncated');
-             payload = e.decoded;
-           } else {  // General error
-             console.log('Protobuf decode failed ' + e);
-           }
-        }
+        payload = decodePayload(stats);
+
         console.log(payload.chaincodeSpec.ctorMsg);
         res.json(payload);
         }
@@ -158,6 +152,20 @@ app.listen(3000, function(){
   console.log('listening on port 3000');
 });
 
+var decodePayload = function(block){
+  try {
+    var payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
+  } catch (e) {
+    if (e.decoded) { // Truncated
+      console.log('payload was truncated');
+       payload = e.decoded;
+     } else {  // General error
+       console.log('Protobuf decode failed ' + e);
+     }
+  };
+  return payload;
+};
+
 
 
 // Add the code to connect to the IBM blockchain
@@ -213,7 +221,7 @@ function cb_ready(err, cc){																	//response has chaincode functions
 			console.log(cc.details);
 			//  What happens if we donn't deploy each time we starting
       console.log('not going to deploy this time...');
-      cc.deploy('init', ['101'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
+      //cc.deploy('init', ['101'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
 		}
 		else{
 			console.log('chaincode summary file indicates chaincode has been previously deployed');
