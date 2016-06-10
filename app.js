@@ -186,10 +186,12 @@ var options = 	{
 						options: {quiet: true, tls:false, maxRetry: 1}
 					},
 					chaincode:{
-						zip_url: 'https://github.com/ibm-blockchain/marbles-chaincode/archive/master.zip',
-						unzip_dir: 'marbles-chaincode-master/hyperledger/part2',								//subdirectroy name of chaincode after unzipped
-						git_url: 'https://github.com/ibm-blockchain/marbles-chaincode/hyperledger/part2',		//GO get http url
-
+						// zip_url: 'https://github.com/ibm-blockchain/marbles-chaincode/archive/master.zip',
+						// unzip_dir: 'marbles-chaincode-master/hyperledger/part2',								//subdirectroy name of chaincode after unzipped
+						// git_url: 'https://github.com/ibm-blockchain/marbles-chaincode/hyperledger/part2',		//GO get http url
+             zip_url: 'https://github.com/ericmvaughn/blocks_chaincode/archive/master.zip',    //zip location
+						 unzip_dir: 'blocks_chaincode-master',								//subdirectroy name of chaincode after unzipped
+             git_url: 'https://github.com/ericmvaughn/blocks_chaincode',  //git location
 					}
 				};
 
@@ -209,7 +211,7 @@ function cb_ready(err, cc){																	//response has chaincode functions
 			console.log(cc.details);
 			//  What happens if we donn't deploy each time we starting
       console.log('not going to deploy this time...');
-      //cc.deploy('init', ['99'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
+      cc.deploy('init', ['101'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
 		}
 		else{
 			console.log('chaincode summary file indicates chaincode has been previously deployed');
