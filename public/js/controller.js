@@ -86,7 +86,12 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
       });
   };
   $scope.update();  //running this function to populate the list on the initial load
-}]);
+}]).directive('userList', function() {
+  return {
+    controller: 'userListCtrl',
+    templateUrl: 'templates/userList.html'
+  };
+  });
 
 //Method for going direectly to the blockchain
 // myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){

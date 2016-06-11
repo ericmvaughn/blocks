@@ -79,31 +79,21 @@
       </table>
     </div>
 
-    <div ng-controller="userListCtrl">
-      <span><h2 class="sub-header">User List</h2>
-      <button type="button" class="btn btn-secondary btn-lg" ng-click="update()">Update</button></span>
-      <div class="table-responsive" >
-        <div class="row">
-          <div class="col-xs-6">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr ng-repeat="(user, value) in userList">
-                  <td>{{user}}</td>
-                  <td>{{value}}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+    <user-list></user-list>
+
+
+
+    <form class="form-inline">
+      <div class="form-group">
+        <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+        <div class="input-group">
+          <div class="input-group-addon">$</div>
+          <input type="text" class="form-control" id="exampleInputAmount" placeholder="Amount">
+          <div class="input-group-addon">.00</div>
         </div>
       </div>
-    </div>
-
+      <button type="submit" class="btn btn-primary">Transfer cash</button>
+    </form>
 
 
   </div>
