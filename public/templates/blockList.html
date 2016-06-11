@@ -1,0 +1,25 @@
+<h2 class="sub-header">Block List</h2>
+<div class="table-responsive" >
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Ledger Commit Time</th>
+        <th>Transactions</th>
+        <th>Type</th>
+        <th>Playload </th>
+        <th>UUID</th>
+        <th>CC ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="block in blockList">
+        <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
+        <td>{{block.transactions.length}}</td>
+        <td>{{block.transactions[0].type}}</td>
+        <td>{{block.transactions[0].payload.chaincodeSpec.ctorMsg}}</td>
+        <td>{{block.transactions[0].uuid | limitTo:30}}</td>
+        <td>{{block.transactions[0].chaincodeID | limitTo:30}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

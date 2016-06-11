@@ -26,58 +26,14 @@
           </div>
         </div>
       </div>
-      <div class="panel-body">
-
-    <div  ng-controller="chainCtrl">
-      <h3>Chain Stats</h3>
-      <div class="row" ng-repeat="(key, value) in chainStats">
-       <div class="col-xs-2">{{key}}</div>
-       <div class="col-xs-6">{{value}}</div>
-     </div>
     </div>
-  </div>
-
-  </div>
-  <div class="panel panel-default" ng-controller="blockCtrl">
-    <div class="panel-heading">
-      <h3 class="panel-title">Block Details <input ng-model='blockID' ng-change="change()"></h3>
-    </div>
-    <div class="panel-body" style = 'word-wrap: break-word;'>
-      <pre>{{block}}</pre>
-    </div>
-    <div class="panel-body" style = 'word-wrap: break-word;'>
-      <h4> Payload </h4>
-      <pre>{{payload}}</pre>
-    </div>
-  </div>
 
 
+    <chain-stats></chain-stats>
 
-    <h2 class="sub-header">Block List</h2>
-    <div class="table-responsive" ng-controller="blockListCtrl">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>Ledger Commit Time</th>
-            <th>Transactions</th>
-            <th>Type</th>
-            <th>Playload </th>
-            <th>UUID</th>
-            <th>CC ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="block in blockList">
-            <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
-            <td>{{block.transactions.length}}</td>
-            <td>{{block.transactions[0].type}}</td>
-            <td>{{block.transactions[0].payload.chaincodeSpec.ctorMsg}}</td>
-            <td>{{block.transactions[0].uuid | limitTo:30}}</td>
-            <td>{{block.transactions[0].chaincodeID | limitTo:30}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <block-details></block-details>
+
+    <block-list></block-list>
 
     <user-list></user-list>
 

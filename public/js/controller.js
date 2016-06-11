@@ -9,7 +9,13 @@ myApp.controller('chainCtrl', ['$scope', '$http', function($scope, $http){
     console.log('got chain_stats');
     $scope.chainStats = response;
   });
-}]);
+}]).directive('chainStats', function() {
+  return {
+    controller: 'chainCtrl',
+    templateUrl: 'templates/chainStats.html'
+  };
+});
+
 myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope, $http, $interval) {
   console.log("Height Controller");
   getHeight();
@@ -46,15 +52,18 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http){
         });
       };
     });
-  }]);
+  }]).directive('blockList', function() {
+    return {
+      controller: 'blockListCtrl',
+      templateUrl: 'templates/blockList.html'
+    };
+  });
 
 myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
   $http.get(baseUrl + '/chain').success(function(response){
     $scope.blockID = response.height - 1;
     getBlock($scope.blockID);
     });
-
-
   $scope.change = function() {
     var id = $scope.blockID;
     console.log("Get a block based on the blockID/" + id);
@@ -66,14 +75,16 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
       //$scope.block = JSON.stringify(response, null, 4);
       $scope.block = angular.toJson(response, 4);
     });
-
     $http.get(baseUrl + '/payload/' + id).success(function(response){
       $scope.payload = angular.toJson(response, 4);
-
     });
   };
-
-}]);
+}]).directive('blockDetails', function() {
+  return {
+    controller: 'blockCtrl',
+    templateUrl: 'templates/blockDetails.html'
+  };
+});
 
 myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
   console.log('calling the userList endpoint');
