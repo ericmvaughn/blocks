@@ -55,6 +55,15 @@ app.get('/chain/blocks/:id', function(req, res){
   });
 });
 
+// Provide an endpoint to deliver the user list
+app.get('/userList', function(req, res) {
+  chaincode.query.users([], function(e, data) {
+    console.log('errror is ' + e);
+    console.log('data is ' + data);
+    res.json(data);
+  });
+});
+
 
 //provide payload details for block with id specified
 
@@ -221,7 +230,7 @@ function cb_ready(err, cc){																	//response has chaincode functions
 			console.log(cc.details);
 			//  What happens if we donn't deploy each time we starting
       console.log('not going to deploy this time...');
-      //cc.deploy('init', ['101'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
+      cc.deploy('init', ['a','101','b','200'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
 		}
 		else{
 			console.log('chaincode summary file indicates chaincode has been previously deployed');

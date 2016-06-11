@@ -75,35 +75,46 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
 
 }]);
 
-
-
 myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
-  console.log('getting ready to do the $http.post');
+  console.log('calling the userList endpoint');
 
-// Two questions here... How should we get the chaincode name and the
-// user name for the secureContext?  just hardcoding them for now.
-  var data = {
-          "jsonrpc": "2.0",
-          "method": "query",
-          "params": {
-            "type": 1,
-            "chaincodeID":{
-                "name":"0d11fe625e76a89edf373681f4706cbd6a8573501a29cf39149309076aa68ee9a776abb49ae3eace35ebb9ad46925f2e2a4063867c730748d3a645aa99b2c125"
-            },
-            "ctorMsg": {
-               "function":"users",
-               "args":[]
-            },
-          "secureContext": "dashboarduser_type0_9ffe26021d"
-          },
-      "id": 5
-      };
-  $http.post(baseUrl + '/chaincode', data).then(function(response){
-    console.log(response);
-    if(response.data.result != null){
-      $scope.userList = angular.fromJson(response.data.result.message);
-    };
-  }, function(response){
-    console.log('an error happened on the $http.post')
-  });
+  $scope.update = function(){
+    $http.get(baseUrl + '/userList').then(function(response){
+      $scope.userList = angular.fromJson(response.data);
+      }, function(response){
+        console.log('an error happened on getting the user list')
+      });
+  };
+  $scope.update();  //running this function to populate the list on the initial load
 }]);
+
+//Method for going direectly to the blockchain
+// myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
+//   console.log('getting ready to do the $http.post');
+// // Two questions here... How should we get the chaincode name and the
+// // user name for the secureContext?  just hardcoding them for now.
+//   var data = {
+//           "jsonrpc": "2.0",
+//           "method": "query",
+//           "params": {
+//             "type": 1,
+//             "chaincodeID":{
+//                 "name":"0d11fe625e76a89edf373681f4706cbd6a8573501a29cf39149309076aa68ee9a776abb49ae3eace35ebb9ad46925f2e2a4063867c730748d3a645aa99b2c125"
+//             },
+//             "ctorMsg": {
+//                "function":"users",
+//                "args":[]
+//             },
+//           "secureContext": "dashboarduser_type0_9ffe26021d"
+//           },
+//       "id": 5
+//       };
+//   $http.post(baseUrl + '/chaincode', data).then(function(response){
+//     console.log(response);
+//     if(response.data.result != null){
+//       $scope.userList = angular.fromJson(response.data.result.message);
+//     };
+//   }, function(response){
+//     console.log('an error happened on the $http.post')
+//   });
+// }]);

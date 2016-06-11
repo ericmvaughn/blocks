@@ -79,26 +79,29 @@
       </table>
     </div>
 
-    <h2 class="sub-header">User List</h2>
-    <div class="table-responsive" ng-controller="userListCtrl">
-      <div class="row">
-        <div class="col-xs-6">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="(user, value) in userList">
-            <td>{{user}}</td>
-            <td>{{value}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div ng-controller="userListCtrl">
+      <span><h2 class="sub-header">User List</h2>
+      <button type="button" class="btn btn-secondary btn-lg" ng-click="update()">Update</button></span>
+      <div class="table-responsive" >
+        <div class="row">
+          <div class="col-xs-6">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr ng-repeat="(user, value) in userList">
+                  <td>{{user}}</td>
+                  <td>{{value}}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
 
 
