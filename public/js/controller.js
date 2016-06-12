@@ -1,4 +1,4 @@
-var myApp = angular.module('myApp', []);
+var myApp = angular.module('myApp', ['ngRoute']);
 
 //var baseUrl = 'http://localhost:5000';
 var baseUrl = '.';

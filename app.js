@@ -141,12 +141,11 @@ app.get('/chain/blockList/:id', function(req, res){
           }
     });
   }
-
-
   setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
     res.json(blockList);
   }, 1000);
 });
+
 
 app.use(function(err, req, res, next){
   console.log('unhandled error detected: ' + err.message);
