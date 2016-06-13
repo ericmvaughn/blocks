@@ -104,6 +104,18 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
   };
   });
 
+  myApp.directive('transfer', function() {
+    return {
+      templateUrl: 'templates/transfer.html'
+    };
+  });
+
+  myApp.directive('overview', function() {
+    return {
+      templateUrl: 'templates/overview.html'
+    };
+  });
+
 //Method for going direectly to the blockchain
 // myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
 //   console.log('getting ready to do the $http.post');

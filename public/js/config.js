@@ -17,6 +17,12 @@ angular.
         when('/chainStats', {
           template: '<chain-stats></chain-stats>'
         }).
+        when('/overview', {
+          template: '<overview></overview>'
+        }).
+        when('/transfer', {
+          template: '<transfer></transfer>'
+        }).
         otherwise('/chainStats');
     }
   ]);
