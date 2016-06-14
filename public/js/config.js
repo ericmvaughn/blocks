@@ -23,6 +23,9 @@ angular.
         when('/transfer', {
           template: '<transfer></transfer>'
         }).
-        otherwise('/chainStats');
+        when('/addUser', {
+          template: '<add-user></add-user>'
+        }).
+        otherwise('/overview');
     }
   ]);

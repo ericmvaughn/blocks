@@ -44,11 +44,23 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http){
     chainHeight = response.height;
 
     $scope.blockList = [];
+    // for (var i = 1; i < chainHeight; i++){
     for (var i = chainHeight - 1; i >= chainHeight - 10; i--){
-
       $http.get(baseUrl + '/chain/blocks/' + i).success(function(response){
-        //console.log(response);
-        $scope.blockList.push(response);
+        var index = $scope.blockList.findIndex(function(block){
+          var newTime = response.nonHashData.localLedgerCommitTimestamp.seconds * 1000 +
+                        response.nonHashData.localLedgerCommitTimestamp.nanos / 1000000
+          var blockTime = block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 +
+                          block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000;
+          return newTime >= blockTime;
+        });
+        console.log('the index is ' + index);
+        if (index == -1){
+          $scope.blockList.push(response);
+        } else {
+          $scope.blockList.splice(index, 0, response);  //splice will insert the block and them copy the remaining elements to the end of the array
+        }
+
         });
       };
     });
@@ -115,6 +127,33 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
       templateUrl: 'templates/overview.html'
     };
   });
+
+  myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http){
+    $scope.submit = function(){
+      var data = {
+        "name": $scope.newUser,
+        "amount": $scope.amount
+      };
+      // clear out the input data -- not sure if this is the correct way
+      $scope.newUser = '';
+      $scope.amount = '';
+     $http.post(baseUrl + '/addUser', data).then(function(response){
+          console.log('response from the addUser post ' );
+          console.log(response);
+           if(response.data.result != null){
+             console.log(response.data.result);
+            };
+          }, function(response){
+            console.log('an error happened on the $http.post')
+          });
+        };
+  }]).directive('addUser', function() {
+    return {
+      controller: 'addUserCtrl',
+      templateUrl: 'templates/addUser.html'
+    };
+    });
+
 
 //Method for going direectly to the blockchain
 // myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
