@@ -287,7 +287,8 @@ var options = 	{
 						 unzip_dir: 'blocks_chaincode-master',								//subdirectroy name of chaincode after unzipped
              git_url: 'https://github.com/ericmvaughn/blocks_chaincode',  //git location
 
-             deployed_name: '72e79caf6fb193a4cf6f5b80fb4e1d4895f6bc7de244623efd4914dff25dd8a875d6483ef624e8a01c8669895be0bc00b47ebf4cea7c887c5c4117fbcba78ca9'
+            //  deployed_name: '72e79caf6fb193a4cf6f5b80fb4e1d4895f6bc7de244623efd4914dff25dd8a875d6483ef624e8a01c8669895be0bc00b47ebf4cea7c887c5c4117fbcba78ca9'
+            deployed_name: '3964883de0dab04297d0b777dbf9eec09f113b542ca9e6b09d82385637aa64006fd816af80cf171c5ba0f9026301a048b2f25c9dd90538b635f3708f0325e942'
 					}
 				};
 
