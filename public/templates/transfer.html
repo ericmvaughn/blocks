@@ -1,11 +1,16 @@
-<form class="form-inline">
+<h1 class="page-header">User to User Transfer</h1>
+
+<form class="form-inline" ng-submit="submit()">
   <div class="form-group">
-    <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+    <label class="sr-only" for="transfer">Amount</label>
     <div class="input-group">
-      <div class="input-group-addon">$</div>
-      <input type="text" class="form-control" id="exampleInputAmount" placeholder="Amount">
-      <div class="input-group-addon">.00</div>
+      <div class="input-group-addon">From User</div>
+      <input type="text" class="form-control" id="fromUser" ng-model="fromUser" placeholder="User Name">
+      <div class="input-group-addon">To User</div>
+      <input type="text" class="form-control" id="toUser" ng-model="toUser"  placeholder="User Name">
+      <div class="input-group-addon">Amount</div>
+      <input type="text" class="form-control" id="transferAmount"  ng-model="amount" placeholder="Amount">
     </div>
   </div>
-  <button type="submit" class="btn btn-primary">Transfer cash</button>
+  <button type="submit" class="btn btn-primary">Transfer</button>
 </form>

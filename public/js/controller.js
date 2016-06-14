@@ -116,12 +116,6 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
   };
   });
 
-  myApp.directive('transfer', function() {
-    return {
-      templateUrl: 'templates/transfer.html'
-    };
-  });
-
   myApp.directive('overview', function() {
     return {
       templateUrl: 'templates/overview.html'
@@ -177,6 +171,35 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
         templateUrl: 'templates/delUser.html'
       };
     });
+
+
+      myApp.controller('transferCtrl', ['$scope', '$http', function($scope, $http){
+        $scope.submit = function(){
+          var data = {
+            "fromName": $scope.fromUser,
+            "toName": $scope.toUser,
+            "amount": $scope.amount
+          };
+          // clear out the input data -- not sure if this is the correct way
+          $scope.fromUser = '';
+          $scope.toUser = '';
+          $scope.amount = '';
+          $http.post(baseUrl + '/transfer', data).then(function(response){
+            console.log('response from the transfer post ' );
+            console.log(response);
+            if(response.data.result != null){
+              console.log(response.data.result);
+            };
+          }, function(response){
+            console.log('an error happened on the $http.post')
+          });
+        };
+      }]).directive('transfer', function() {
+        return {
+          controller: 'transferCtrl',
+          templateUrl: 'templates/transfer.html'
+        };
+      });
 
 
 //Method for going direectly to the blockchain

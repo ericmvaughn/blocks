@@ -75,7 +75,7 @@ app.post('/addUser', function(req, res) {
 });
 
 app.post('/delUser', function(req, res) {
-  console.log('addUser request body');
+  console.log('delUser request body');
   console.log(req.body);
   console.log('name = ' + req.body.name);
   var args = [req.body.name];
@@ -89,6 +89,26 @@ app.post('/delUser', function(req, res) {
          }
      });
 });
+
+
+app.post('/transfer', function(req, res) {
+  console.log('transfer request body');
+  console.log(req.body);
+  console.log('name = ' + req.body.name);
+  var args = [req.body.fromName, req.body.toName, req.body.amount];
+  console.log('the args are... ' + args);
+  chaincode.invoke.transfer(args, function(err, data){
+         console.log('transfer response:', data, err);
+         if (err != null) {
+           res.send(err);
+         } else {
+           res.json(data.message);
+         }
+     });
+});
+
+
+
 
 //provide payload details for block with id specified
 
