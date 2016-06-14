@@ -1,5 +1,6 @@
 var app = require('express')();
 var morgan = require('morgan');
+var bodyparser = require('body-parser');
 var atob = require('atob');
 var ProtoBuf = require("protobufjs");
 var ByteBuffer = require("bytebuffer");
@@ -15,6 +16,8 @@ var hexyFormat = {};
 
 app.use(morgan('dev'));
 app.use(require('express').static(__dirname + '/public'));
+//app.use(require('body-parser').urlencoded({ extended: true }));
+app.use(bodyparser.json());
 
 app.get('/', function(req, res){
   console.log('Display basic home page.');
@@ -62,6 +65,22 @@ app.get('/userList', function(req, res) {
     console.log('data is ' + data);
     res.json(data);
   });
+});
+
+app.post('/addUser', function(req, res) {
+  console.log('addUser request body');
+  console.log(req.body);
+  console.log('name = ' + req.body.name);
+  var args = [req.body.name, req.body.amount];
+  console.log('the args are... ' + args);
+  chaincode.invoke.new(args, function(err, data){
+         console.log('add user response:', data, err);
+         if (err != null) {
+           res.send(err);
+         } else {
+           res.json(data.message);
+         }
+     });
 });
 
 
