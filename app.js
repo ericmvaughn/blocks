@@ -229,6 +229,8 @@ var options = 	{
              zip_url: 'https://github.com/ericmvaughn/blocks_chaincode/archive/master.zip',    //zip location
 						 unzip_dir: 'blocks_chaincode-master',								//subdirectroy name of chaincode after unzipped
              git_url: 'https://github.com/ericmvaughn/blocks_chaincode',  //git location
+
+             deployed_name: '72e79caf6fb193a4cf6f5b80fb4e1d4895f6bc7de244623efd4914dff25dd8a875d6483ef624e8a01c8669895be0bc00b47ebf4cea7c887c5c4117fbcba78ca9'
 					}
 				};
 
@@ -243,11 +245,9 @@ function cb_ready(err, cc){																	//response has chaincode functions
 	else{
 		chaincode = cc;
 		if(!cc.details.deployed_name || cc.details.deployed_name === ''){					//decide if i need to deploy
-			//emv  adding prints to see if deploy really needs to be called
-			console.log('printing out the chaincode details to see if it really needs to be deployed  ');
-			console.log(cc.details);
-			//  What happens if we donn't deploy each time we starting
-      console.log('not going to deploy this time...');
+			//  once the first deploy has been done the deployed_name needs to be
+      //  set to the cc ID in the options structure.  There must be a better
+      //  way to do this.
       cc.deploy('init', ['a','101','b','200'], {save_path: './cc_summaries', delay_ms: 50000}, cb_deployed);
 		}
 		else{
