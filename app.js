@@ -6,13 +6,6 @@ var ProtoBuf = require("protobufjs");
 var ByteBuffer = require("bytebuffer");
 var hexy = require('hexy');
 
-var builder = ProtoBuf.loadProtoFile("./node_modules/hlc-experimental/protos/fabric.proto"),    // Creates the Builder
-    PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
-
-var hexyFormat = {};
-    hexyFormat.width = 16; // how many bytes per line, default 16
-    hexyFormat.format = "twos";
-
 
 app.use(morgan('dev'));
 app.use(require('express').static(__dirname + '/public'));
@@ -33,10 +26,8 @@ app.get('/chain', function(req, res){
         res.send('There was an error getting the chain stats.  ');
       }
 		else {
-        var output = JSON.stringify(stats, null, 4);
-        // console.log('Got the block stats... ', output);
         console.log('Got the block stats... ');
-        res.send(output);
+        res.json(stats);
         }
   });
 });
@@ -53,6 +44,7 @@ app.get('/chain/blocks/:id', function(req, res){
         console.log('Got the block stats... ');
         payload = decodePayload(stats);
         stats.transactions[0].payload = payload;
+        stats.transactions[0].chaincodeID = decodeChaincodeID(stats);
         res.json(stats);
         }
   });
@@ -179,6 +171,15 @@ app.listen(3000, function(){
   console.log('listening on port 3000');
 });
 
+
+var builder = ProtoBuf.loadProtoFile("./node_modules/hlc-experimental/protos/fabric.proto"),    // Creates the Builder
+    PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
+
+var hexyFormat = {};
+    hexyFormat.width = 16; // how many bytes per line, default 16
+    hexyFormat.format = "twos";
+
+
 var decodePayload = function(block){
   try {
     var payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
@@ -191,6 +192,20 @@ var decodePayload = function(block){
      }
   };
   return payload;
+};
+
+var decodeChaincodeID = function(block){
+  try {
+    var id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
+  } catch (e) {
+    if (e.decoded) { // Truncated
+      console.log('ChaincodeID was truncated');
+       id = e.decoded;
+     } else {  // General error
+       console.log('Protobuf decode failed ' + e);
+     }
+  };
+  return id;
 };
 
 

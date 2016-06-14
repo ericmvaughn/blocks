@@ -16,9 +16,9 @@
         <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
         <td>{{block.transactions.length}}</td>
         <td>{{block.transactions[0].type}}</td>
-        <td>{{block.transactions[0].payload.chaincodeSpec.ctorMsg}}</td>
+        <td>{{block.transactions[0].payload.chaincodeSpec.ctorMsg.function}}: &nbsp;&nbsp; {{block.transactions[0].payload.chaincodeSpec.ctorMsg.args}}</td>
         <td>{{block.transactions[0].uuid | limitTo:30}}</td>
-        <td>{{block.transactions[0].chaincodeID | limitTo:30}}</td>
+        <td>{{block.transactions[0].chaincodeID.name | limitTo:30}}</td>
       </tr>
     </tbody>
   </table>
