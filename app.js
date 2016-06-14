@@ -40,10 +40,9 @@ app.get('/chain/blocks/:id', function(req, res){
         res.send('There was an error getting the block stats.  ');
       }
 		else {
-        // console.log('Got the block stats... ', stats);
         console.log('Got the block stats... ');
-        payload = decodePayload(stats);
-        stats.transactions[0].payload = payload;
+        stats.transactions[0].type = decodeType(stats);
+        stats.transactions[0].payload = decodePayload(stats);
         stats.transactions[0].chaincodeID = decodeChaincodeID(stats);
         res.json(stats);
         }
@@ -208,7 +207,15 @@ var decodeChaincodeID = function(block){
   return id;
 };
 
-
+var decodeType = function(block){
+  var Type = PROTOS.Transaction.Type;
+  for (type in Type){
+    if (Type[type] == block.transactions[0].type) {
+      return type;
+    }
+  }
+  return block.transactions[0].type;
+};
 
 // Add the code to connect to the IBM blockchain
 var Ibc1 = require('ibm-blockchain-js');
