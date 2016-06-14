@@ -154,6 +154,30 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
     };
     });
 
+    myApp.controller('delUserCtrl', ['$scope', '$http', function($scope, $http){
+      $scope.submit = function(){
+        var data = {
+          "name": $scope.delUser
+        };
+        // clear out the input data -- not sure if this is the correct way
+        $scope.delUser = '';
+        $http.post(baseUrl + '/delUser', data).then(function(response){
+          console.log('response from the delUser post ' );
+          console.log(response);
+          if(response.data.result != null){
+            console.log(response.data.result);
+          };
+        }, function(response){
+          console.log('an error happened on the $http.post')
+        });
+      };
+    }]).directive('delUser', function() {
+      return {
+        controller: 'delUserCtrl',
+        templateUrl: 'templates/delUser.html'
+      };
+    });
+
 
 //Method for going direectly to the blockchain
 // myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){

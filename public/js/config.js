@@ -26,6 +26,9 @@ angular.
         when('/addUser', {
           template: '<add-user></add-user>'
         }).
+        when('/delUser', {
+          template: '<del-user></del-user>'
+        }).
         otherwise('/overview');
     }
   ]);
