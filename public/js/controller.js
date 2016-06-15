@@ -42,10 +42,11 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http){
   $http.get(baseUrl + '/chain').success(function(response){
     //console.log('got chain_stats');
     chainHeight = response.height;
+    $scope.lastBlock = chainHeight - 1;
 
     $scope.blockList = [];
     // for (var i = 1; i < chainHeight; i++){
-    for (var i = chainHeight - 1; i >= chainHeight - 10; i--){
+    for (var i = chainHeight - 1; i >= chainHeight - 20; i--){
       $http.get(baseUrl + '/chain/blocks/' + i).success(function(response){
         var index = $scope.blockList.findIndex(function(block){
           var newTime = response.nonHashData.localLedgerCommitTimestamp.seconds * 1000 +

@@ -3,16 +3,18 @@
   <table class="table table-striped">
     <thead>
       <tr>
+        <th>#</th>
         <th>Ledger Commit Time</th>
         <th>Transactions</th>
         <th>Type</th>
         <th>Playload </th>
-        <th>UUID</th>
-        <th>CC ID</th>
+        <th>Transaction ID</th>
+        <th>Chaincode ID</th>
       </tr>
     </thead>
     <tbody>
       <tr ng-repeat="block in blockList">
+        <td>{{lastBlock - $index}}
         <td>{{block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
         <td>{{block.transactions.length}}</td>
         <td>{{block.transactions[0].type}}</td>
