@@ -17,6 +17,7 @@
     "hlc-experimental": "0.0.1",
     "ibm-blockchain-js": "^1.2.1",
     "morgan": "^1.7.0",
-    "protobufjs": "^5.0.1"
+    "protobufjs": "^5.0.1",
+    "q": "^1.4.1"
   }
 }

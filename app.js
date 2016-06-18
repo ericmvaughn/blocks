@@ -5,7 +5,10 @@ var atob = require('atob');
 var ProtoBuf = require("protobufjs");
 var ByteBuffer = require("bytebuffer");
 var hexy = require('hexy');
-
+var Q = require('q');
+// Add the code to connect to the IBM blockchain
+var Ibc1 = require('ibm-blockchain-js');
+var ibc = new Ibc1();
 
 app.use(morgan('dev'));
 app.use(require('express').static(__dirname + '/public'));
@@ -168,27 +171,49 @@ app.get('/all/blocks', function(req, res){
   }, 1000);
 });
 
+var getBlock = Q.nfbind(ibc.block_stats);
+var getFormattedBlock = function(id){
+  return getBlock(id).then(function(value){
+    value.transactions[0].type = decodeType(value);
+    value.transactions[0].payload = decodePayload(value);
+    value.transactions[0].chaincodeID = decodeChaincodeID(value);
+    return {id: id, block: value};
+  });
+};
 
 app.get('/chain/blockList/:id', function(req, res){
   console.log('build a list of n blocks');
   //TODO  add some protection so i doesn't go negative
   var blockList = [];
-  for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
+  var promises = [];
 
-    ibc.block_stats(i, function(e, stats){
-      if (e != null) {
-          console.log('There was an error getting the block_stats:', e);
-          res.send('There was an error getting the block stats.  ');
-        }
-  		else {
-          //console.log('Adding another block to the list...');
-          blockList.push(stats);
-          }
-    });
+  for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
+    promises.push(getFormattedBlock(i));
   }
-  setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
-    res.json(blockList);
-  }, 1000);
+
+  Q.all(promises).then(function(values){
+    res.json(values);
+  }, function(e){
+    console.log(e);
+    res.send(e);
+  }).done();
+
+  // for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
+  //
+  //   ibc.block_stats(i, function(e, stats){
+  //     if (e != null) {
+  //         console.log('There was an error getting the block_stats:', e);
+  //         res.send('There was an error getting the block stats.  ');
+  //       }
+  // 		else {
+  //         //console.log('Adding another block to the list...');
+  //         blockList.push(stats);
+  //         }
+  //   });
+  // }
+  // setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
+  //   res.json(blockList);
+  // }, 1000);
 });
 
 
@@ -252,9 +277,7 @@ var decodeType = function(block){
   return block.transactions[0].type;
 };
 
-// Add the code to connect to the IBM blockchain
-var Ibc1 = require('ibm-blockchain-js');
-var ibc = new Ibc1();
+
 
 // ==================================
 // load peers manually or from VCAP, VCAP will overwrite hardcoded list!
