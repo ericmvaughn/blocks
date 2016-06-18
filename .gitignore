@@ -1,3 +1,4 @@
 **/node_modules
 **/cc_summaries
 credentials.json
+cred_local.json
