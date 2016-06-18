@@ -85,8 +85,8 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
   function getBlock(id){
     $http.get(baseUrl + '/chain/blocks/' + id).success(function(response){
       //console.log("print with JSON.stringify");
-      //$scope.block = JSON.stringify(response, null, 4);
-      $scope.block = angular.toJson(response, 4);
+      $scope.block = response;
+      //$scope.block = angular.toJson(response, 4);
     });
     $http.get(baseUrl + '/payload/' + id).success(function(response){
       $scope.payload = angular.toJson(response, 4);
