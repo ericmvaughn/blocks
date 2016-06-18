@@ -112,7 +112,6 @@ app.post('/transfer', function(req, res) {
 
 
 
-
 //provide payload details for block with id specified
 
 app.get('/payload/:id', function(req, res){
@@ -140,36 +139,6 @@ app.get('/height', function(req, res){
   res.send(chainHeight.toString());
 });
 
-app.get('/all/blocks', function(req, res){
-  console.log('build a list of all of the blocks');
-  var html = '<h1>Block Details </h1>'
-  for (var i = chainHeight - 1; i > 0; i--){
-    //html += '<p > Block id: ' + i + '</p>';
-    ibc.block_stats(i, function(e, stats){
-      if (e != null) {
-          console.log('There was an error getting the block_stats:', e);
-          res.send('There was an error getting the block stats.  ');
-        }
-  		else {
-          var ccid = stats.transactions[0].chaincodeID;
-          var payload = stats.transactions[0].payload;
-
-          //html += '<p > Block id: ' + i + '</p>';  // this doesn't work because i = the end point of the for loop by the time the callback happens
-          //html += '<p>Created: &nbsp;' + formatDate(blocks[id].blockstats.transactions[0].timestamp.seconds * 1000, '%M-%d-%Y %I:%m%p') + ' UTC</p>';
-          html += '<p> transaction count ' + stats.transactions.length + '</p>';
-          html += '<p> UUID: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + stats.transactions[0].uuid.toString() + '</p>';
-          html += '<p> Type:  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' + stats.transactions[0].type.toString() + '</p>';
-          html += '<p> CC ID:  &nbsp;&nbsp;&nbsp;&nbsp;' + atob(ccid).toString() + '</p>';
-          html += '<p> Payload length:  &nbsp;' + payload.length.toString() + '</p>';
-          html += '<p> &nbsp; </p>';
-          //console.log(html);
-          }
-    });
-  }
-  setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
-    res.send(html);
-  }, 1000);
-});
 
 var getBlock = Q.nfbind(ibc.block_stats);
 var getFormattedBlock = function(id){
@@ -187,7 +156,7 @@ app.get('/chain/blockList/:id', function(req, res){
   var blockList = [];
   var promises = [];
 
-  for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
+  for (var i = chainHeight - 1; i >= chainHeight - req.params.id && i > 0; i--){
     promises.push(getFormattedBlock(i));
   }
 
@@ -197,23 +166,6 @@ app.get('/chain/blockList/:id', function(req, res){
     console.log(e);
     res.send(e);
   }).done();
-
-  // for (var i = chainHeight - 1; i >= chainHeight - req.params.id; i--){
-  //
-  //   ibc.block_stats(i, function(e, stats){
-  //     if (e != null) {
-  //         console.log('There was an error getting the block_stats:', e);
-  //         res.send('There was an error getting the block stats.  ');
-  //       }
-  // 		else {
-  //         //console.log('Adding another block to the list...');
-  //         blockList.push(stats);
-  //         }
-  //   });
-  // }
-  // setTimeout(function(){  //Added this delay to give the block_stats callbacks to complete
-  //   res.json(blockList);
-  // }, 1000);
 });
 
 
