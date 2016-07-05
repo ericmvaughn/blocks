@@ -99,7 +99,9 @@ app.post('/transfer', function(req, res) {
   console.log(req.body);
   console.log('name = ' + req.body.name);
   var args = [req.body.fromName, req.body.toName, req.body.amount];
+  var args1 = [req.body.fromName, req.body.toName+'10', req.body.amount];
   console.log('the args are... ' + args);
+  chaincode.invoke.transfer(args1, function(err, data){});
   chaincode.invoke.transfer(args, function(err, data){
          console.log('transfer response:', data, err);
          if (err != null) {
@@ -265,7 +267,9 @@ var options = 	{
 
             //  deployed_name: '72e79caf6fb193a4cf6f5b80fb4e1d4895f6bc7de244623efd4914dff25dd8a875d6483ef624e8a01c8669895be0bc00b47ebf4cea7c887c5c4117fbcba78ca9'
             // deployed_name: '3964883de0dab04297d0b777dbf9eec09f113b542ca9e6b09d82385637aa64006fd816af80cf171c5ba0f9026301a048b2f25c9dd90538b635f3708f0325e942'
-					  deployed_name: '2a18b2fc6e88ba7ae110ac9a694324ef715cf661fc8baad8d452e40132ded0db6840e4d91957ef48a7abc73c382e0e4e3121123abea9c6a6676c61796a65a87a'
+					  // deployed_name: '2a18b2fc6e88ba7ae110ac9a694324ef715cf661fc8baad8d452e40132ded0db6840e4d91957ef48a7abc73c382e0e4e3121123abea9c6a6676c61796a65a87a'
+            //deployed_name: '2b85cc800210da0bcf331babede4399aa7f898e3353eb6d093b3fb367162fd6784ca0b70742939ad2fcb1cd983caec055ae5a46449dc58fa760e87cf863a1c72'
+            deployed_name: '48546babebfabfda47cc19d68fb94f0896a449864bed657ff1e5896c3b01c93c82d55e2f64f7b55490f127b1998d7e09e9a9cd246cd425cf723dee991b82227f'
           }
 				};
 
