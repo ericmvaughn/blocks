@@ -4,11 +4,17 @@ var bodyparser = require('body-parser');
 var atob = require('atob');
 var ProtoBuf = require("protobufjs");
 //var ByteBuffer = require("bytebuffer");
-var hexy = require('hexy');
+//var hexy = require('hexy');
 var Q = require('q');
 var hlc = require('hfc');
 var debug = require('debug')('blocks');
+var rest = require('rest');
+var mime = require('rest/interceptor/mime');
+var errorCode = require('rest/interceptor/errorCode');
+var restClient = rest.wrap(mime).wrap(errorCode, { code: 400 });
 
+
+var  chainHeight = 0;
 
 // Configure test users
 //
@@ -29,7 +35,8 @@ var chaincodePath = "github.com/blocks_chaincode/";
 
 // testChaincodeID will store the chaincode ID value after deployment.
 // set it to the current value for now so we don't need to do a deploy each run
-var chaincodeID = '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695';
+//var chaincodeID = '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695';
+var chaincodeID;
 
 // Initializing values for chaincode parameters
 var initA = "100";
@@ -56,6 +63,16 @@ var chain = hlc.newChain("targetChain");
 // The FileKeyValStore is a simple file-based KeyValStore, but you
 // can easily implement your own to store whereever you want.
 chain.setKeyValStore( hlc.newFileKeyValStore('/tmp/keyValStore') );
+var store = chain.getKeyValStore();
+// store.setValue('chaincodeID',
+//           '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695',
+//           function(err){
+//             if(err) console.log('error saving chaincodeid. ' + err);
+//           });
+store.getValue('chaincodeID', function(err, value){
+  if(err) console.log('error getting chaincodeID ' + err);
+  if(value) chaincodeID = value;
+});
 
 // Set the URL for member services
 chain.setMemberServicesUrl("grpc://localhost:50051");
@@ -131,6 +148,11 @@ app.get('/deploy', function(req, res) {
       console.log("deploy results: " + results);
       // Set the testChaincodeID for subsequent tests
       chaincodeID = results.chaincodeID;
+      store.setValue('chaincodeID',
+                chaincodeID,
+                function(err){
+                  if(err) console.log('error saving chaincodeid. ' + err);
+                });
       console.log("chaincodeID: " + chaincodeID);
       debug("Successfully deployed chaincode: request/response " + deployRequest + results);
     });
@@ -165,8 +187,7 @@ app.get('/userList', function(req, res) {
       // Existing state variable to retrieve
       args: []
   };
-  // temporarily set chaincodeID if not set
-//  if (queryRequest.chaincodeID == null)  queryRequest.chaincodeID = '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695';
+
   // Trigger the query transaction
   user_Member1.setTCertBatchSize(1);
   var queryTx = user_Member1.query(queryRequest);
@@ -197,8 +218,7 @@ app.post('/addUser', function(req, res) {
     args: [req.body.name, req.body.amount]
   };
   console.log('the args are... ' + invokeRequest.args);
-  // temporarily set chaincodeID if not set
-  //if (queryRequest.chaincodeID == null)  queryRequest.chaincodeID = '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695';
+
   // Trigger the invoke transaction
   var invokeTx = user_Member1.invoke(invokeRequest);
   // Return the invoke results
@@ -261,6 +281,86 @@ app.post('/delUser', function(req, res) {
 });
 
 
+//  Add calls to the fabric rest interface until supportted by the SDK
+app.get('/chain', function(req, res){
+  console.log('Display chain stats');
+  restClient('http://localhost:5000/chain/').then(function(response){
+      console.log(response.entity);
+      chainHeight = response.entity.height;
+      res.json(response.entity);
+  }, function(response){
+        console.log(response);
+        console.log('Error path: There was an error getting the chain_stats:', response.status.code, response.entity.Error);
+        res.send('Error path: There was an error getting the chain stats.  ' + response.entity.Error);
+  });
+});
+
+app.get('/chain/blocks/:id', function(req, res){
+  console.log('Display a list of the blocks');
+  restClient('http://localhost:5000/chain/blocks/'+req.params.id).then(function(response){
+      var block = response.entity;
+      console.log(response.entity);
+      block.transactions[0].type = decodeType(block);
+      block.transactions[0].payload = decodePayload(block);
+      block.transactions[0].chaincodeID = decodeChaincodeID(block);
+      res.json(block);
+  }, function(response){
+        console.log(response);
+        console.log('Error path: There was an error getting the block_stats:', response.status.code, response.entity.Error);
+        res.send('Error path: There was an error getting the block stats.  ' + response.entity.Error);
+  });
+});
+
+//provide payload details for block with id specified
+app.get('/payload/:id', function(req, res){
+  restClient('http://localhost:5000/chain/blocks/'+req.params.id).then(function(response){
+    if (response.status.code != 200) {
+      console.log('There was an error getting the block_stats:', response.status.code);
+      res.send('There was an error getting the block stats.  ' + response.entity.Error);
+    } else {
+      console.log(response.entity);
+      payload = decodePayload(response.entity);
+      console.log(payload.chaincodeSpec.ctorMsg);
+      res.json(payload);
+    }
+  }, function(response){
+        console.log(response);
+        console.log('Error path: There was an error getting the block_stats:', response.status.code, response.entity.Error);
+        res.send('Error path: There was an error getting the block stats.  ' + response.entity.Error);
+  });
+});
+
+
+var getFormattedBlock = function(id){
+  return restClient('http://localhost:5000/chain/blocks/'+id).then(function(response){
+    var value = response.entity;
+    value.transactions[0].type = decodeType(value);
+    value.transactions[0].payload = decodePayload(value);
+    value.transactions[0].chaincodeID = decodeChaincodeID(value);
+    return {id: id, block: value};
+  });
+};
+
+app.get('/chain/blockList/:id', function(req, res){
+  console.log('build a list of n blocks');
+  //TODO  add some protection so i doesn't go negative
+  var blockList = [];
+  var promises = [];
+
+  for (var i = chainHeight - 1; i >= chainHeight - req.params.id && i > 0; i--){
+    promises.push(getFormattedBlock(i));
+  }
+
+  Q.all(promises).then(function(values){
+    res.json(values);
+  }, function(response){
+    console.log(response);
+    console.log("just printed response and now doing the res.send..." + response.entity.Error);
+    res.send(response.entity.Error);
+  }).done();
+});
+
+
 
 app.use(function(err, req, res, next){
   console.log('unhandled error detected: ' + err.message);
@@ -277,61 +377,43 @@ app.listen(3000, function(){
 
 
 
+var builder = ProtoBuf.loadProtoFile("./node_modules/hfc/lib/protos/fabric.proto"),    // Creates the Builder
+    PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
 
+var decodePayload = function(block){
+  try {
+    var payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
+  } catch (e) {
+    if (e.decoded) { // Truncated
+      console.log('payload was truncated');
+       payload = e.decoded;
+     } else {  // General error
+       console.log('Protobuf decode failed ' + e);
+     }
+  };
+  return payload;
+};
 
+var decodeChaincodeID = function(block){
+  try {
+    var id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
+  } catch (e) {
+    if (e.decoded) { // Truncated
+      console.log('ChaincodeID was truncated');
+       id = e.decoded;
+     } else {  // General error
+       console.log('Protobuf decode failed ' + e);
+     }
+  };
+  return id;
+};
 
-
-
-
-
-// Main web app function to listen for and handle requests
-function listenForUserRequests() {
-   for (;;) {
-      // WebApp-specific logic goes here to await the next request.
-      // ...
-      // Assume that we received a request from an authenticated user
-      // 'userName', and determined that we need to invoke the chaincode
-      // with 'chaincodeID' and function named 'fcn' with arguments 'args'.
-      handleUserRequest(userName,chaincodeID,fcn,args);
-   }
-}
-
-// Handle a user request
-function handleUserRequest(userName, chaincodeID, fcn, args) {
-   // Register and enroll this user.
-   // If this user has already been registered and/or enrolled, this will
-   // still succeed because the state is kept in the KeyValStore
-   // (i.e. in '/tmp/keyValStore' in this sample).
-   var registrationRequest = {
-        enrollmentID: userName,
-        // Customize account & affiliation
-        account: "bank_a",
-        affiliation: "00001"
-   };
-   chain.registerAndEnroll( registrationRequest, function(err, user) {
-      if (err) return console.log("ERROR: %s",err);
-      // Issue an invoke request
-      var invokeRequest = {
-        // Name (hash) required for invoke
-        chaincodeID: chaincodeID,
-        // Function to trigger
-        fcn: fcn,
-        // Parameters for the invoke function
-        args: args
-     };
-     // Invoke the request from the user object.
-     var tx = user.invoke(invokeRequest);
-     // Listen for the 'submitted' event
-     tx.on('submitted', function(results) {
-        console.log("submitted invoke: %j",results);
-     });
-     // Listen for the 'complete' event.
-     tx.on('complete', function(results) {
-        console.log("completed invoke: %j",results);
-     });
-     // Listen for the 'error' event.
-     tx.on('error', function(err) {
-        console.log("error on invoke: %j",err);
-     });
-   });
-}
+var decodeType = function(block){
+  var Type = PROTOS.Transaction.Type;
+  for (type in Type){
+    if (Type[type] == block.transactions[0].type) {
+      return type;
+    }
+  }
+  return block.transactions[0].type;
+};
