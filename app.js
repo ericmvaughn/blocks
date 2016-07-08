@@ -185,7 +185,7 @@ app.listen(3000, function(){
 });
 
 
-var builder = ProtoBuf.loadProtoFile("./node_modules/hlc-experimental/protos/fabric.proto"),    // Creates the Builder
+var builder = ProtoBuf.loadProtoFile("./node_modules/hfc/lib/protos/fabric.proto"),    // Creates the Builder
     PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
 
 var hexyFormat = {};
