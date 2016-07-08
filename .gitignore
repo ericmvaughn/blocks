@@ -1,4 +1,5 @@
 **/node_modules
+**/public/vendor
 **/cc_summaries
 credentials.json
 cred_local.json
