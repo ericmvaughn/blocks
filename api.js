@@ -202,7 +202,8 @@ app.get('/userList', function(req, res) {
   });
   queryTx.on('error', function (err) {
       // Query failed
-      console.log("Failed to query existing chaincode state: error= " + err);
+      debug(err);
+      console.log("Failed to query existing chaincode state:  ", err);
       res.send('Error: ' + err);
   });
 
@@ -225,7 +226,7 @@ app.post('/addUser', function(req, res) {
   invokeTx.on('submitted', function (results) {
       // Invoke transaction submitted successfully
       console.log("Successfully submitted chaincode invoke transaction: ", invokeRequest, results);
-      res.json(results)
+      res.json(results);
   });
   invokeTx.on('error', function (err) {
       // Invoke transaction submission failed
@@ -248,7 +249,7 @@ app.post('/transfer', function(req, res) {
   invokeTx.on('submitted', function (results) {
       // Invoke transaction submitted successfully
       console.log("Successfully submitted chaincode invoke transaction: ", invokeRequest, results);
-      res.json(results)
+      res.json(results);
   });
   invokeTx.on('error', function (err) {
       // Invoke transaction submission failed
@@ -272,7 +273,7 @@ app.post('/delUser', function(req, res) {
   invokeTx.on('submitted', function (results) {
       // Invoke transaction submitted successfully
       console.log("Successfully submitted chaincode invoke transaction: ", invokeRequest, results);
-      res.json(results)
+      res.json(results);
   });
   invokeTx.on('error', function (err) {
       // Invoke transaction submission failed
@@ -381,8 +382,9 @@ var builder = ProtoBuf.loadProtoFile("./node_modules/hfc/lib/protos/fabric.proto
     PROTOS = builder.build("protos");                            // Returns just the 'js' namespace if that's all we need
 
 var decodePayload = function(block){
+  var payload;
   try {
-    var payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
+    payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
   } catch (e) {
     if (e.decoded) { // Truncated
       console.log('payload was truncated');
@@ -390,13 +392,14 @@ var decodePayload = function(block){
      } else {  // General error
        console.log('Protobuf decode failed ' + e);
      }
-  };
+  }
   return payload;
 };
 
 var decodeChaincodeID = function(block){
+  var id;
   try {
-    var id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
+    id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
   } catch (e) {
     if (e.decoded) { // Truncated
       console.log('ChaincodeID was truncated');
@@ -404,13 +407,13 @@ var decodeChaincodeID = function(block){
      } else {  // General error
        console.log('Protobuf decode failed ' + e);
      }
-  };
+  }
   return id;
 };
 
 var decodeType = function(block){
   var Type = PROTOS.Transaction.Type;
-  for (type in Type){
+  for (var type in Type){
     if (Type[type] == block.transactions[0].type) {
       return type;
     }

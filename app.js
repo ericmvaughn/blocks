@@ -24,7 +24,7 @@ app.get('/', function(req, res){
 app.get('/chain', function(req, res){
   console.log('Display chain stats');
   ibc.chain_stats( function(e, stats){
-    if (e != null) {
+    if (e !== null) {
         console.log('There was an error getting the chain_stats:', e);
         res.send('There was an error getting the chain stats.  ');
       }
@@ -38,7 +38,7 @@ app.get('/chain', function(req, res){
 app.get('/chain/blocks/:id', function(req, res){
   console.log('Display a list of the blocks');
   ibc.block_stats(req.params.id, function(e, stats){
-    if (e != null) {
+    if (e !== null) {
         console.log('There was an error getting the block_stats:', e);
         res.send('There was an error getting the block stats.  ');
       }
@@ -69,7 +69,7 @@ app.post('/addUser', function(req, res) {
   console.log('the args are... ' + args);
   chaincode.invoke.new(args, function(err, data){
          console.log('add user response:', data, err);
-         if (err != null) {
+         if (err !== null) {
            res.send(err);
          } else {
            res.json(data.message);
@@ -85,7 +85,7 @@ app.post('/delUser', function(req, res) {
   console.log('the args are... ' + args);
   chaincode.invoke.delete(args, function(err, data){
          console.log('delete user response:', data, err);
-         if (err != null) {
+         if (err !== null) {
            res.send(err);
          } else {
            res.json(data.message);
@@ -104,7 +104,7 @@ app.post('/transfer', function(req, res) {
   chaincode.invoke.transfer(args1, function(err, data){});
   chaincode.invoke.transfer(args, function(err, data){
          console.log('transfer response:', data, err);
-         if (err != null) {
+         if (err !== null) {
            res.send(err);
          } else {
            res.json(data.message);
@@ -119,7 +119,7 @@ app.post('/transfer', function(req, res) {
 app.get('/payload/:id', function(req, res){
   console.log('Display the payload for block id...');
   ibc.block_stats(req.params.id, function(e, stats){
-    if (e != null) {
+    if (e !== null) {
         console.log('There was an error getting the block_stats:', e);
         res.send('There was an error getting the block stats.  ');
       }
@@ -128,7 +128,7 @@ app.get('/payload/:id', function(req, res){
         // console.log('test hexy on the payload');
         // console.log(hexy.hexy(data, hexyFormat));
 
-        payload = decodePayload(stats);
+        var payload = decodePayload(stats);
 
         console.log(payload.chaincodeSpec.ctorMsg);
         res.json(payload);
@@ -194,8 +194,9 @@ var hexyFormat = {};
 
 
 var decodePayload = function(block){
+  var payload;
   try {
-    var payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
+    payload = PROTOS.ChaincodeInvocationSpec.decode64(block.transactions[0].payload);
   } catch (e) {
     if (e.decoded) { // Truncated
       console.log('payload was truncated');
@@ -203,13 +204,14 @@ var decodePayload = function(block){
      } else {  // General error
        console.log('Protobuf decode failed ' + e);
      }
-  };
+  }
   return payload;
 };
 
 var decodeChaincodeID = function(block){
+  var id;
   try {
-    var id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
+    id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
   } catch (e) {
     if (e.decoded) { // Truncated
       console.log('ChaincodeID was truncated');
@@ -217,13 +219,13 @@ var decodeChaincodeID = function(block){
      } else {  // General error
        console.log('Protobuf decode failed ' + e);
      }
-  };
+  }
   return id;
 };
 
 var decodeType = function(block){
   var Type = PROTOS.Transaction.Type;
-  for (type in Type){
+  for (var type in Type){
     if (Type[type] == block.transactions[0].type) {
       return type;
     }
@@ -277,7 +279,7 @@ ibc.load(options, cb_ready);																//parse/load chaincode
 
 var chaincode = null;
 function cb_ready(err, cc){																	//response has chaincode functions
-	if(err != null){
+	if(err !== null){
 		console.log('! looks like an error loading the chaincode or network, app will fail\n', err);
 		if(!process.error) process.error = {type: 'load', msg: err.details};				//if it already exist, keep the last error
 	}
@@ -294,10 +296,10 @@ function cb_ready(err, cc){																	//response has chaincode functions
 			cb_deployed();
 		}
 	}
-};
+}
 
 function cb_deployed(e, d){
-	if(e != null){
+	if(e !== null){
 		//look at tutorial_part1.md in the trouble shooting section for help
 		console.log('! looks like a deploy error, holding off on the starting the socket\n', e);
 		if(!process.error) process.error = {type: 'deploy', msg: e.details};
@@ -306,14 +308,14 @@ function cb_deployed(e, d){
 		console.log('...just did the deploy so lets see the new cc details... ');
 		console.log(chaincode.details);
   }
-};
+}
 
 // note the chain height that is returned in the chain_stats and
 // monitor_blockheight functions is actually 1 greater than the id of the
 // last block on the chain.  However, I think the chain starts with block id 1
 var chainHeight = 0;
 ibc.chain_stats(function(e, stats){
-  if(e != null) console.log('error getting chain stats: ', e);
+  if(e !== null) console.log('error getting chain stats: ', e);
   else{
     console.log('got the chain stats and the height is: ', stats.height);
     chainHeight = stats.height;
@@ -323,11 +325,11 @@ ibc.chain_stats(function(e, stats){
 //  It turns out the doc is incorrect and the callback for monitor_blockheight
 //  only returns the stats and doesn't return an error.
 ibc.monitor_blockheight(function(stats){
-  if(stats == null){
+  if(stats === null){
     console.log('Error getting stats from monitor_blockheight');
   }
   else {
     console.log('got the chain stats from monitor_blockheight and the height is: ', stats.height);
     chainHeight = stats.height;
   }
-})
+});

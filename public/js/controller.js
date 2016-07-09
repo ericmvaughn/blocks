@@ -27,7 +27,7 @@ myApp.controller('heightCtrl', ['$scope', '$http', '$interval', function($scope,
       //console.log('got chain_stats');
       $scope.height = response.height;
       });
-    };
+    }
     // Copied from the Angular documentation
     // listen on DOM destroy (removal) event, and cancel the next UI update
    // to prevent updating time after the DOM element was removed.
@@ -68,7 +68,7 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http){
     $http.get(baseUrl + '/payload/' + id).success(function(response){
       $scope.payload = angular.toJson(response, 4);
     });
-  };
+  }
 }]).directive('blockDetails', function() {
   return {
     controller: 'blockCtrl',
@@ -83,7 +83,7 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
     $http.get(baseUrl + '/userList').then(function(response){
       $scope.userList = angular.fromJson(response.data);
       }, function(response){
-        console.log('an error happened on getting the user list')
+        console.log('an error happened on getting the user list');
       });
   };
   $scope.update();  //running this function to populate the list on the initial load
@@ -112,11 +112,11 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
      $http.post(baseUrl + '/addUser', data).then(function(response){
           console.log('response from the addUser post ' );
           console.log(response);
-           if(response.data.result != null){
+           if(response.data.result !== null){
              console.log(response.data.result);
-            };
+            }
           }, function(response){
-            console.log('an error happened on the $http.post')
+            console.log('an error happened on the $http.post');
           });
         };
   }]).directive('addUser', function() {
@@ -136,11 +136,11 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
         $http.post(baseUrl + '/delUser', data).then(function(response){
           console.log('response from the delUser post ' );
           console.log(response);
-          if(response.data.result != null){
+          if(response.data.result !== null){
             console.log(response.data.result);
-          };
+          }
         }, function(response){
-          console.log('an error happened on the $http.post')
+          console.log('an error happened on the $http.post');
         });
       };
     }]).directive('delUser', function() {
@@ -165,11 +165,11 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http){
           $http.post(baseUrl + '/transfer', data).then(function(response){
             console.log('response from the transfer post ' );
             console.log(response);
-            if(response.data.result != null){
+            if(response.data.result !== null){
               console.log(response.data.result);
-            };
+            }
           }, function(response){
-            console.log('an error happened on the $http.post')
+            console.log('an error happened on the $http.post');
           });
         };
       }]).directive('transfer', function() {
