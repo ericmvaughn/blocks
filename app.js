@@ -1,3 +1,19 @@
+/*
+Copyright [yyyy] [name of copyright owner]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 // jscs:disable requireSpacesInAnonymousFunctionExpression
 var app = require('express')();
@@ -235,9 +251,9 @@ var decodeType = function(block) {
 // ==================================
 
 // inserting the credentials for my blockchain from a seperate file
-// var manual = require('./credentials.json');
+var manual = require('./cred-blockchain-of.json');
 // using a credentials file for the vagrant/docker blockchain
-var manual = require('./cred_local.json');
+//var manual = require('./cred_local.json');
 
 var peers = manual.credentials.peers;
 console.log('loading hardcoded peers');
@@ -254,7 +270,7 @@ var options = {
   network: {
     peers: peers,
     users: users,
-    options: {quiet: true, tls: false, maxRetry: 1}
+    options: {quiet: false, tls: true, maxRetry: 1}
   },
   chaincode: {
     // jscs:disable maximumLineLength
@@ -266,10 +282,10 @@ var options = {
     git_url: 'https://github.com/ericmvaughn/blocks_chaincode',  //git location
 
     //  deployed_name: '72e79caf6fb193a4cf6f5b80fb4e1d4895f6bc7de244623efd4914dff25dd8a875d6483ef624e8a01c8669895be0bc00b47ebf4cea7c887c5c4117fbcba78ca9'
-    // deployed_name: '3964883de0dab04297d0b777dbf9eec09f113b542ca9e6b09d82385637aa64006fd816af80cf171c5ba0f9026301a048b2f25c9dd90538b635f3708f0325e942'
+    //deployed_name: '3964883de0dab04297d0b777dbf9eec09f113b542ca9e6b09d82385637aa64006fd816af80cf171c5ba0f9026301a048b2f25c9dd90538b635f3708f0325e942'
     // deployed_name: '2a18b2fc6e88ba7ae110ac9a694324ef715cf661fc8baad8d452e40132ded0db6840e4d91957ef48a7abc73c382e0e4e3121123abea9c6a6676c61796a65a87a'
     //deployed_name: '2b85cc800210da0bcf331babede4399aa7f898e3353eb6d093b3fb367162fd6784ca0b70742939ad2fcb1cd983caec055ae5a46449dc58fa760e87cf863a1c72'
-    deployed_name: '48546babebfabfda47cc19d68fb94f0896a449864bed657ff1e5896c3b01c93c82d55e2f64f7b55490f127b1998d7e09e9a9cd246cd425cf723dee991b82227f'
+    //deployed_name: '48546babebfabfda47cc19d68fb94f0896a449864bed657ff1e5896c3b01c93c82d55e2f64f7b55490f127b1998d7e09e9a9cd246cd425cf723dee991b82227f'
     // jscs:enable maximumLineLength
   }
 };

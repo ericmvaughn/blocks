@@ -1,3 +1,19 @@
+/*
+Copyright [yyyy] [name of copyright owner]
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 var app = require('express')();
 var morgan = require('morgan');
 var bodyparser = require('body-parser');
@@ -48,7 +64,7 @@ var chain = hlc.newChain('targetChain');
 // as so it is important to secure this storage.
 // The FileKeyValStore is a simple file-based KeyValStore, but you
 // can easily implement your own to store whereever you want.
-chain.setKeyValStore(hlc.newFileKeyValStore('/tmp/keyValStore'));
+chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
 var store = chain.getKeyValStore();
 // store.setValue('chaincodeID',
 //           '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695',
@@ -64,10 +80,19 @@ store.getValue('chaincodeID', function(err, value) {
   }
 });
 
+// load bluemix credentials from file-based
+var bluemix = require('./cred-blockchain-of.json');
+
 // URL for the REST interface to the peer
-var restUrl = 'http://localhost:5000/';
+var restUrl = 'http://localhost:5000';
+// var restUrl = bluemix.credentials.peers[2].api_url;
+// var netId = bluemix.credentials.peers[2].network_id;
+//var caUrl = bluemix.credentials.ca.
+
 // Set the URL for member services
 chain.setMemberServicesUrl('grpc://localhost:50051');
+// TODO add code to look up the ca url from the credentials file.
+// chain.setMemberServicesUrl('grpc://ffa1d5bd-8020-45f2-a2af-1f95075613d0_ca.blockchain.ibm.com:30304');
 // Add a peer's URL
 chain.addPeer('grpc://localhost:30303');
 
@@ -286,7 +311,7 @@ app.post('/delUser', function(req, res) {
 //  Add calls to the fabric rest interface until supportted by the SDK
 app.get('/chain', function(req, res) {
   console.log('Display chain stats');
-  restClient('http://localhost:5000/chain/')
+  restClient(restUrl + '/chain/')
   .then(function(response) {
     console.log(response.entity);
     chainHeight = response.entity.height;
@@ -302,7 +327,7 @@ app.get('/chain', function(req, res) {
 
 app.get('/chain/blocks/:id', function(req, res) {
   console.log('Display a list of the blocks');
-  restClient(restUrl + 'chain/blocks/' + req.params.id)
+  restClient(restUrl + '/chain/blocks/' + req.params.id)
   .then(function(response) {
     var block = response.entity;
     console.log(response.entity);
@@ -321,7 +346,7 @@ app.get('/chain/blocks/:id', function(req, res) {
 
 //provide payload details for block with id specified
 app.get('/payload/:id', function(req, res) {
-  restClient(restUrl + 'chain/blocks/' + req.params.id)
+  restClient(restUrl + '/chain/blocks/' + req.params.id)
   .then(function(response) {
     if (response.status.code != 200) {
       console.log('There was an error getting the block_stats:',
@@ -344,7 +369,7 @@ app.get('/payload/:id', function(req, res) {
 });
 
 var getFormattedBlock = function(id) {
-  return restClient(restUrl + 'chain/blocks/' + id)
+  return restClient(restUrl + '/chain/blocks/' + id)
   .then(function(response) {
     var value = response.entity;
     value.transactions[0].type = decodeType(value);
