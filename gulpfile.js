@@ -1,6 +1,7 @@
 var gulp = require('gulp');
 var jshint = require('gulp-jshint');
 var jscs = require('gulp-jscs');
+var mocha = require('gulp-mocha');
 
 // Lint Task
 gulp.task('lint', function() {
@@ -16,10 +17,16 @@ gulp.task('jscs', function() {
   .pipe(jscs.reporter());
 });
 
+// mocha testing
+gulp.task('mocha', function() {
+  return gulp.src(['test/*.js'])
+  .pipe(mocha({reporter: 'spec', useColors: true}));
+});
+
 // Watch Files For Changes
 gulp.task('watch', function() {
-  gulp.watch(['*.js','public/js/*.js'], ['lint', 'jscs']);
+  gulp.watch(['*.js','public/js/*.js', 'test/**'], ['lint', 'jscs', 'mocha']);
 });
 
 // Default Task
-gulp.task('default', ['lint', 'jscs', 'watch']);
+gulp.task('default', ['lint', 'jscs', 'mocha', 'watch']);
