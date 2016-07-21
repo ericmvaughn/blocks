@@ -19,6 +19,7 @@ var morgan = require('morgan');
 var bodyparser = require('body-parser');
 var atob = require('atob');
 var ProtoBuf = require('protobufjs');
+var util = require('./util.js');
 //var ByteBuffer = require("bytebuffer");
 //var hexy = require('hexy');
 var Q = require('q');
@@ -331,9 +332,9 @@ app.get('/chain/blocks/:id', function(req, res) {
   .then(function(response) {
     var block = response.entity;
     console.log(response.entity);
-    block.transactions[0].type = decodeType(block);
-    block.transactions[0].payload = decodePayload(block);
-    block.transactions[0].chaincodeID = decodeChaincodeID(block);
+    block.transactions[0].type = util.decodeType(block);
+    block.transactions[0].payload = util.decodePayload(block);
+    block.transactions[0].chaincodeID = util.decodeChaincodeID(block);
     res.json(block);
   }, function(response) {
     console.log(response);
@@ -355,7 +356,7 @@ app.get('/payload/:id', function(req, res) {
                 response.entity.Error);
     } else {
       console.log(response.entity);
-      payload = decodePayload(response.entity);
+      payload = util.decodePayload(response.entity);
       console.log(payload.chaincodeSpec.ctorMsg);
       res.json(payload);
     }
@@ -372,9 +373,9 @@ var getFormattedBlock = function(id) {
   return restClient(restUrl + '/chain/blocks/' + id)
   .then(function(response) {
     var value = response.entity;
-    value.transactions[0].type = decodeType(value);
-    value.transactions[0].payload = decodePayload(value);
-    value.transactions[0].chaincodeID = decodeChaincodeID(value);
+    value.transactions[0].type = util.decodeType(value);
+    value.transactions[0].payload = util.decodePayload(value);
+    value.transactions[0].chaincodeID = util.decodeChaincodeID(value);
     return {id: id, block: value};
   });
 };
@@ -416,48 +417,3 @@ app.use(function(req, res) {
 app.listen(3000, function() {
   console.log('listening on port 3000');
 });
-
-var builder = ProtoBuf.loadProtoFile(
-              './node_modules/hfc/lib/protos/fabric.proto');    // Creates the Builder
-var PROTOS = builder.build('protos');                            // Returns just the 'js' namespace if that's all we need
-
-var decodePayload = function(block) {
-  var payload;
-  try {
-    payload = PROTOS.ChaincodeInvocationSpec.decode64(
-                                              block.transactions[0].payload);
-  } catch (e) {
-    if (e.decoded) { // Truncated
-      console.log('payload was truncated');
-      payload = e.decoded;
-    } else {  // General error
-      console.log('Protobuf decode failed ' + e);
-    }
-  }
-  return payload;
-};
-
-var decodeChaincodeID = function(block) {
-  var id;
-  try {
-    id = PROTOS.ChaincodeID.decode64(block.transactions[0].chaincodeID);
-  } catch (e) {
-    if (e.decoded) { // Truncated
-      console.log('ChaincodeID was truncated');
-      id = e.decoded;
-    } else {  // General error
-      console.log('Protobuf decode failed ' + e);
-    }
-  }
-  return id;
-};
-
-var decodeType = function(block) {
-  var Type = PROTOS.Transaction.Type;
-  for (var type in Type) {
-    if (Type[type] == block.transactions[0].type) {
-      return type;
-    }
-  }
-  return block.transactions[0].type;
-};
