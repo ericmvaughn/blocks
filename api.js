@@ -202,7 +202,6 @@ app.get('/member', function(req, res) {
 
 // Provide an endpoint to deliver the user list
 app.get('/userList', function(req, res) {
-
   var queryRequest = {
     // Name (hash) required for query
     chaincodeID: chaincodeID,
@@ -211,19 +210,20 @@ app.get('/userList', function(req, res) {
     // Existing state variable to retrieve
     args: []
   };
-
   // Trigger the query transaction
   userMember1.setTCertBatchSize(1);
   var queryTx = userMember1.query(queryRequest);
-
   // Print the query results
   queryTx.on('complete', function(results) {
     // Query completed successfully
     console.log(results);
-    console.log(results.results);
+    console.log(results.result);
     console.log('Successfully queried existing chaincode state: value=%s ' +
-    results.result.toString());
-    res.json(results.result.toString());
+      results.result.toString());
+    var list = JSON.parse(results.result);
+    console.log(list);
+    res.json(list);
+    //res.json(results.result.toString());
   });
   queryTx.on('error', function(err) {
     // Query failed
@@ -231,7 +231,6 @@ app.get('/userList', function(req, res) {
     console.log('Failed to query existing chaincode state:  ', err);
     res.send('Error: ' + err);
   });
-
 });
 
 app.post('/addUser', function(req, res) {
@@ -314,7 +313,7 @@ app.get('/chain', function(req, res) {
   console.log('Display chain stats');
   restClient(restUrl + '/chain/')
   .then(function(response) {
-    console.log(response.entity);
+    debug(response.entity);
     chainHeight = response.entity.height;
     res.json(response.entity);
   }, function(response) {
@@ -327,11 +326,11 @@ app.get('/chain', function(req, res) {
 });
 
 app.get('/chain/blocks/:id', function(req, res) {
-  console.log('Display a list of the blocks');
+  console.log('Get a block by ID');
   restClient(restUrl + '/chain/blocks/' + req.params.id)
   .then(function(response) {
     var block = response.entity;
-    console.log(response.entity);
+    debug(response.entity);
     block.transactions[0].type = util.decodeType(block);
     block.transactions[0].payload = util.decodePayload(block);
     block.transactions[0].chaincodeID = util.decodeChaincodeID(block);
@@ -355,7 +354,7 @@ app.get('/payload/:id', function(req, res) {
       res.send('There was an error getting the block stats.  ' +
                 response.entity.Error);
     } else {
-      console.log(response.entity);
+      debug(response.entity);
       payload = util.decodePayload(response.entity);
       console.log(payload.chaincodeSpec.ctorMsg);
       res.json(payload);
@@ -406,11 +405,15 @@ app.get('/chain/blockList/:id', function(req, res) {
 
 app.use(function(err, req, res, next) {
   console.log('unhandled error detected: ' + err.message);
+  res.type('text/plain');
+  res.status(500);
   res.send('500 - server error');
 });
 
 app.use(function(req, res) {
   console.log('route not handled');
+  res.type('text/plain');
+  res.status(404);
   res.send('404 - not found');
 });
 
