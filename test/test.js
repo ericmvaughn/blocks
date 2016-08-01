@@ -1,29 +1,29 @@
 var assert = require('chai').assert;
 var request =require('superagent');
 var util = require('../util.js');
-var validBlock = require('./valid-block.json');
+var validBlock = require('./valid-block2.json');
 var url = 'http://localhost:3000';
 
 describe('ProtoBuf', function() {
   describe('decodePayload', function() {
-    it('should fail if run with invalid block input', function() {
-      var block = '';
-      var payload = util.decodePayload(block);
+    it('should fail if run with invalid transaction input', function() {
+      var transaction = '';
+      var payload = util.decodePayload(transaction);
       assert.isUndefined(payload);
       });
 
     it('should decode the payload', function() {
-      var block = require('./valid-block.json');
-      var payload = util.decodePayload(block);
+      var payload = util.decodePayload(validBlock.transactions[0]);
       assert.isObject(payload, 'decoded payload is an object');
       assert.isDefined(payload.chaincodeSpec, 'payload should contain chaincodeSpec');
-      assert.equal(payload.chaincodeSpec.ctorMsg.function, 'transfer', 'the function should be transfer');
-    })
+      assert.equal(payload.chaincodeSpec.ctorMsg.function, 'delete',
+        'the function should be a delete');
+    });
   });
   //test the decodeChaincodeID function
   describe('decodeChaincodeID', function() {
     it('should decode and return the chaincode ID', function() {
-      var id = util.decodeChaincodeID(validBlock);
+      var id = util.decodeChaincodeID(validBlock.transactions[0]);
       assert.isDefined(id);
       assert.property(id, 'name', 'should contain a name');
       assert.isString(id.name, 'the chaincodeID name should be a string');
@@ -32,9 +32,33 @@ describe('ProtoBuf', function() {
   });
   describe('decodeType', function() {
     it('should return the transaction type', function() {
-      var type = util.decodeType(validBlock);
+      var type = util.decodeType(validBlock.transactions[0]);
       assert.isDefined(type);
       assert.oneOf(type, ['CHAINCODE_DEPLOY', 'CHAINCODE_INVOKE', 'CHAINCODE_QUERY', 'CHAINCODE_TERMINATE']);
+    });
+  });
+  describe('decodeBlock', function() {
+    it('should decode the block transactions', function() {
+      var newBlock = util.decodeBlock(validBlock);
+      var id, type;
+      assert.isDefined(newBlock);
+      //console.log(newBlock);
+      for (var i = 0; i < 2; i++) {
+        assert.isObject(newBlock.transactions[i].payload,
+          'decoded payload is an object');
+        assert.isDefined(newBlock.transactions[i].payload.chaincodeSpec,
+          'payload should contain chaincodeSpec');
+        assert.equal(newBlock.transactions[i].payload.chaincodeSpec.ctorMsg.function,
+          'delete', 'the function should be a delete');
+        id = newBlock.transactions[i].chaincodeID;
+        assert.isDefined(id);
+        assert.property(id, 'name', 'should contain a name');
+        assert.isString(id.name, 'the chaincodeID name should be a string');
+        assert.isAtLeast(id.name.length, 1, 'the chaincodeID should have a name');
+        type = newBlock.transactions[i].type;
+        assert.isDefined(type);
+        assert.oneOf(type, ['CHAINCODE_DEPLOY', 'CHAINCODE_INVOKE', 'CHAINCODE_QUERY', 'CHAINCODE_TERMINATE']);
+      }
     });
   });
 });
@@ -139,12 +163,10 @@ describe('Blockchain REST interface', function() {
         assert.equal(res.status, 200, 'should recieve a 200 status');
         assert.isArray(res.body, 'should return list of transactions');
         //console.log(res.body);
-        assert.property(res.body[0], 'id',
-          'a memeber of the array should contain an id');
         assert.lengthOf(res.body, 4, 'there should be 4 transactions in the list');
-        assert.property(res.body[0], 'transaction',
-          'a memeber of the array should contain a transaction');
-        assert.property(res.body[0].transaction, 'payload',
+        assert.property(res.body[0], 'type',
+          'a memeber of the array should contain a type');
+        assert.property(res.body[0], 'payload',
           'a transaction should have a payload');
         done();
       });

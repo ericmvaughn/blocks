@@ -326,14 +326,11 @@ app.get('/chain', function(req, res) {
 });
 
 app.get('/chain/blocks/:id', function(req, res) {
-  console.log('Get a block by ID');
+  console.log('Get a block by ID: ' + req.params.id);
   restClient(restUrl + '/chain/blocks/' + req.params.id)
   .then(function(response) {
-    var block = response.entity;
     debug(response.entity);
-    block.transactions[0].type = util.decodeType(block);
-    block.transactions[0].payload = util.decodePayload(block);
-    block.transactions[0].chaincodeID = util.decodeChaincodeID(block);
+    var block = util.decodeBlock(response.entity);
     res.json(block);
   }, function(response) {
     console.log(response);
@@ -355,7 +352,7 @@ app.get('/payload/:id', function(req, res) {
                 response.entity.Error);
     } else {
       debug(response.entity);
-      payload = util.decodePayload(response.entity);
+      payload = util.decodePayload(response.entity.transactions[0]);
       console.log(payload.chaincodeSpec.ctorMsg);
       res.json(payload);
     }
@@ -372,28 +369,26 @@ var getFormattedBlock = function(id) {
   return restClient(restUrl + '/chain/blocks/' + id)
   .then(function(response) {
     var value = response.entity;
-    value.transactions[0].type = util.decodeType(value);
-    value.transactions[0].payload = util.decodePayload(value);
-    value.transactions[0].chaincodeID = util.decodeChaincodeID(value);
+    var len = value.transactions.length;
+    value = util.decodeBlock(value);
     return {id: id, block: value};
   });
 };
 
+var blockList = [];
+
 app.get('/chain/blockList/:id', function(req, res) {
   console.log('build a list of n blocks');
-  //TODO  add some protection so i doesn't go negative
-  var blockList = [];
-  var promises = [];
 
-  for (
-    var i = chainHeight - 1;
-    i >= chainHeight - req.params.id && i > 0;
-    i--
-  ) {
+  var promises = [];
+  for (var i = chainHeight - 1;
+        i >= chainHeight - req.params.id && i > 0;
+        i--) {
     promises.push(getFormattedBlock(i));
   }
 
   Q.all(promises).then(function(values) {
+    blockList = values;
     res.json(values);
   }, function(response) {
     console.log(response);
@@ -403,6 +398,18 @@ app.get('/chain/blockList/:id', function(req, res) {
   }).done();
 });
 
+app.get('/chain/transactionList/:id', function(req, res) {
+  var list = [];
+  var len = blockList.length;
+  for (var i = 0; i < len; i++) {
+    list = list.concat(blockList[i].block.transactions);
+  }
+  if (list.length > req.params.id) {
+    res.json(list.slice(0, req.params.id));
+  } else {
+    res.json(list);
+  }
+});
 app.use(function(err, req, res, next) {
   console.log('unhandled error detected: ' + err.message);
   res.type('text/plain');
