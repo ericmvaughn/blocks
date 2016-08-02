@@ -402,7 +402,9 @@ app.get('/chain/transactionList/:id', function(req, res) {
   var list = [];
   var len = blockList.length;
   for (var i = 0; i < len; i++) {
-    list = list.concat(blockList[i].block.transactions);
+    //using both slice and reverse because slice will make a copy of the
+    //array before reverse() reverses the order in place.  
+    list = list.concat(blockList[i].block.transactions.slice().reverse());
   }
   if (list.length > req.params.id) {
     res.json(list.slice(0, req.params.id));
