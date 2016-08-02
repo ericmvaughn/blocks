@@ -1,7 +1,7 @@
 var assert = require('chai').assert;
 var request =require('superagent');
 var util = require('../util.js');
-var validBlock = require('./valid-block2.json');
+var validBlock = require('./valid-block.json');
 var url = 'http://localhost:3000';
 
 describe('ProtoBuf', function() {
