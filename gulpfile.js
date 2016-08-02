@@ -25,8 +25,16 @@ gulp.task('mocha', function() {
 
 // Watch Files For Changes
 gulp.task('watch', function() {
+  gulp.watch(['*.js','public/js/*.js', 'test/**'], ['lint', 'jscs']);
+});
+
+// Watch Files For Changes
+gulp.task('watchTest', function() {
   gulp.watch(['*.js','public/js/*.js', 'test/**'], ['lint', 'jscs', 'mocha']);
 });
 
+// Testing Task
+gulp.task('test', ['lint', 'jscs', 'mocha', 'watchTest']);
+
 // Default Task
-gulp.task('default', ['lint', 'jscs', 'mocha', 'watch']);
+gulp.task('default', ['lint', 'jscs', 'watch']);
