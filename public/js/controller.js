@@ -37,6 +37,20 @@ function($scope, $http, $interval) {
   });
 }]);
 
+myApp.controller('transactionListCtrl', ['$scope', '$http',
+    function($scope, $http) {
+  console.log('Get the last 20 transactions');
+  $scope.transactionList = [];
+  $http.get(baseUrl + '/chain/transactionList/20').success(function(response) {
+    $scope.transactionList = response;
+  });
+}]).directive('transactionList', function() {
+  return {
+    controller: 'transactionListCtrl',
+    templateUrl: 'templates/transactionList.html'
+  };
+});
+
 myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http) {
   console.log('Get the last 20 blocks');
   $scope.blockList = [];

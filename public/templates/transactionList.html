@@ -1,0 +1,23 @@
+<h2 class="sub-header">Transaction List</h2>
+<div class="table-responsive" >
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Time</th>
+        <th>Type</th>
+        <th>Playload </th>
+        <th>Chaincode ID</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="transaction in transactionList">
+        <td>{{transaction.uuid | limitTo:30}}</td>
+        <td>{{transaction.timestamp.seconds * 1000 | date:"medium"}}</td>
+        <td>{{transaction.type}}</td>
+        <td>{{transaction.payload.chaincodeSpec.ctorMsg.function}}: &nbsp;&nbsp; {{transaction.payload.chaincodeSpec.ctorMsg.args}}</td>
+        <td>{{transaction.chaincodeID.name | limitTo:30}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

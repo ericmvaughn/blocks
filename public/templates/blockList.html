@@ -6,10 +6,9 @@
         <th>#</th>
         <th>Ledger Commit Time</th>
         <th>Transactions</th>
-        <th>Type</th>
-        <th>Playload </th>
-        <th>Transaction ID</th>
-        <th>Chaincode ID</th>
+        <th>State Hash</th>
+        <th>Previous Block Hash </th>
+        <th>Transaction Results</th>
       </tr>
     </thead>
     <tbody>
@@ -17,10 +16,12 @@
         <td>{{block.id}}
         <td>{{block.block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
         <td>{{block.block.transactions.length}}</td>
-        <td>{{block.block.transactions[0].type}}</td>
-        <td>{{block.block.transactions[0].payload.chaincodeSpec.ctorMsg.function}}: &nbsp;&nbsp; {{block.block.transactions[0].payload.chaincodeSpec.ctorMsg.args}}</td>
-        <td>{{block.block.transactions[0].uuid | limitTo:30}}</td>
-        <td>{{block.block.transactions[0].chaincodeID.name | limitTo:30}}</td>
+        <td>{{block.block.stateHash | limitTo:30}}</td>
+        <td>{{block.block.previousBlockHash | limitTo:30}}</td>
+        <td><p ng-repeat="result in block.block.nonHashData.transactionResults">
+                      {{result | limitTo:30}}
+            </p>
+        </td>
       </tr>
     </tbody>
   </table>

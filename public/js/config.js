@@ -11,6 +11,9 @@ angular.
         when('/blockList', {
           template: '<block-list></block-list>'
         }).
+        when('/transactionList', {
+          template: '<transaction-list></transaction-list>'
+        }).
         when('/userList', {
           template: '<user-list></user-list>'
         }).
