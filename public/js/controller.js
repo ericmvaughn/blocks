@@ -44,6 +44,9 @@ myApp.controller('transactionListCtrl', ['$scope', '$http',
   $http.get(baseUrl + '/chain/transactionList/20').success(function(response) {
     $scope.transactionList = response;
   });
+  $scope.popup = function(index) {
+    $scope.popupTransaction = $scope.transactionList[index];
+  };
 }]).directive('transactionList', function() {
   return {
     controller: 'transactionListCtrl',
@@ -57,10 +60,8 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http) {
   $http.get(baseUrl + '/chain/blockList/20').success(function(response) {
     $scope.blockList = response;
   });
-  $scope.popup = function(id) {
-    $http.get(baseUrl + '/chain/blocks/' + id).success(function(response) {
-      $scope.block = response;
-    });
+  $scope.popup = function(index) {
+    $scope.popupBlock = $scope.blockList[index].block;
   };
 }]).directive('blockList', function() {
   return {
