@@ -13,7 +13,7 @@
     </thead>
     <tbody>
       <tr ng-repeat="block in blockList">
-        <td>{{block.id}}
+        <td><a href="" data-toggle="modal" data-target="#myModal" ng-click="popup(block.id)">{{block.id}}</a>
         <td>{{block.block.nonHashData.localLedgerCommitTimestamp.seconds * 1000 + block.block.nonHashData.localLedgerCommitTimestamp.nanos / 1000000 | date:'medium'}}</td>
         <td>{{block.block.transactions.length}}</td>
         <td>{{block.block.stateHash | limitTo:30}}</td>
@@ -25,4 +25,22 @@
       </tr>
     </tbody>
   </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Block details</h4>
+      </div>
+      <div class="modal-body">
+        <pre>{{block | json}}</pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>

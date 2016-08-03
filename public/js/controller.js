@@ -57,6 +57,11 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http) {
   $http.get(baseUrl + '/chain/blockList/20').success(function(response) {
     $scope.blockList = response;
   });
+  $scope.popup = function(id) {
+    $http.get(baseUrl + '/chain/blocks/' + id).success(function(response) {
+      $scope.block = response;
+    });
+  };
 }]).directive('blockList', function() {
   return {
     controller: 'blockListCtrl',
@@ -69,6 +74,8 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.blockID = response.height - 1;
     getBlock($scope.blockID);
   });
+  console.log('The blockID is ' + $scope.blockID);
+
   $scope.change = function() {
     var id = $scope.blockID;
     console.log('Get a block based on the blockID/' + id);
