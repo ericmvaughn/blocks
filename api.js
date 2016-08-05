@@ -377,39 +377,57 @@ var getFormattedBlock = function(id) {
 
 var blockList = [];
 
-app.get('/chain/blockList/:id', function(req, res) {
-  console.log('build a list of n blocks');
-
+var buildBlockList = function(height) {
   var promises = [];
-  for (var i = chainHeight - 1;
-        i >= chainHeight - req.params.id && i > 0;
-        i--) {
+  for (var i = 1; i < chainHeight; i++) {
     promises.push(getFormattedBlock(i));
   }
+  return Q.all(promises);
+};
 
-  Q.all(promises).then(function(values) {
+app.get('/chain/blockList/:id', function(req, res) {
+  console.log('build a list of n blocks');
+  var id = req.params.id;
+  buildBlockList(chainHeight).then(function(values) {
     blockList = values;
-    res.json(values);
+    if (chainHeight > id) {
+      res.json(blockList.slice(-id).reverse());
+    } else {
+      res.json(blockList.slice(0, chainHeight).reverse());
+    }
   }, function(response) {
-    console.log(response);
-    console.log('just printed response and now doing the res.send...' +
-                response.entity.Error);
+    console.log('Error building the blockList ' + response.entity.Error);
     res.send(response.entity.Error);
   }).done();
 });
 
 app.get('/chain/transactionList/:id', function(req, res) {
   var list = [];
+  var count = 0;
   var len = blockList.length;
-  for (var i = 0; i < len; i++) { // using both slice and reverse because slice will make a copy of the array before reverse() reverses the order in place.
-    list = list.concat(blockList[i].block.transactions.slice().reverse());
+  for (var i = 1; i < len && count < req.params.id; i++) {
+    var block = blockList[i].block;
+    var transLen = block.transactions.length;
+    console.log('number of transactions in this block ' + transLen);
+    for (var j = 0; j < transLen; j++) {
+      var transaction = block.transactions[j];
+      var result;
+      for (var k = 0; k < transLen; k++) {
+        if (block.nonHashData.transactionResults[k].uuid === transaction.uuid) {
+          result = block.nonHashData.transactionResults[k];
+        }
+      }
+      list.push({transaction: transaction, result: result});
+      count++;
+    }
   }
   if (list.length > req.params.id) {
-    res.json(list.slice(0, req.params.id));
+    res.json(list.slice(0, req.params.id).reverse());
   } else {
-    res.json(list);
+    res.json(list.slice().reverse());
   }
 });
+
 app.use(function(err, req, res, next) {
   console.log('unhandled error detected: ' + err.message);
   res.type('text/plain');

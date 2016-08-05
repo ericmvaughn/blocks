@@ -141,11 +141,11 @@ describe('Blockchain REST interface', function() {
         assert.isNull(err);
         assert.equal(res.status, 200, 'should recieve a 200 status');
         assert.isArray(res.body, 'should return list of blocks');
+        assert.lengthOf(res.body, 4, 'there should be 4 blocks in the list');
         //console.log(res.body);
         assert.property(res.body[0], 'id', 'a memeber of the array should contain an id');
         assert.equal(res.body[0].id, lastBlock,
           'the id of the 1st member should be the last block');
-        assert.lengthOf(res.body, 4, 'there should be 4 blocks in the list');
         assert.property(res.body[0], 'block',
           'a memeber of the array should contain a block');
         assert.property(res.body[0].block, 'transactions',
@@ -164,9 +164,13 @@ describe('Blockchain REST interface', function() {
         assert.isArray(res.body, 'should return list of transactions');
         //console.log(res.body);
         assert.lengthOf(res.body, 4, 'there should be 4 transactions in the list');
-        assert.property(res.body[0], 'type',
+        assert.property(res.body[0], 'transaction',
+          'a memeber of the array should contain a transaction');
+        assert.property(res.body[0], 'result',
+          'a memeber of the array should contain a result');
+        assert.property(res.body[0].transaction, 'type',
           'a memeber of the array should contain a type');
-        assert.property(res.body[0], 'payload',
+        assert.property(res.body[0].transaction, 'payload',
           'a transaction should have a payload');
         done();
       });
@@ -192,6 +196,7 @@ describe('Chaincode REST interface', function() {
 
   describe('/addUser', function() {
     it('should add a new user', function(done) {
+      this.timeout(4000);
       request
       .post(url + '/addUser')
       .send({name: 'testUser1', amount: '100'})
@@ -203,6 +208,7 @@ describe('Chaincode REST interface', function() {
       });
     });
     it('should add a second user', function(done) {
+      this.timeout(4000);
       request
       .post(url + '/addUser')
       .send({name: 'testUser2', amount: '200'})
@@ -212,12 +218,13 @@ describe('Chaincode REST interface', function() {
       assert.property(res.body, 'uuid', 'reply should have uuid');
       setTimeout(function() {
         done();
-      }, 1000);    // hack to give time for the transaction to complete
+      }, 2000);    // hack to give time for the transaction to complete
       });
     });
   });
   describe('/userList', function(){
     it('should return a list of users', function(done) {
+      this.timeout(4000);
       request
       .get(url + '/userList')
       .accept('application/json')
@@ -234,19 +241,21 @@ describe('Chaincode REST interface', function() {
   });
   describe('/transfer', function() {
     it('should transfer 10 from testUser1 to testUser2', function(done) {
+      this.timeout(4000);
       request
       .post(url + '/transfer')
       .send({fromName: 'testUser1', toName: 'testUser2', amount: '10'})
       .end(function(err, res) {
         assert.isNull(err);
-        console.log(res.body);
+        //console.log(res.body);
         assert.property(res.body, 'uuid', 'reply should have uuid');
         setTimeout(function() {
           done();
-        }, 1000);    // hack to give time for the transaction to complete
+        }, 2000);    // hack to give time for the transaction to complete
       });
     });
     it('should transfer correct amount', function(done) {
+      this.timeout(4000);
       request
       .get(url + '/userList')
       .end(function(err, res) {
@@ -262,6 +271,7 @@ describe('Chaincode REST interface', function() {
   });
   describe('/delUser', function() {
     it('should delete a user', function(done) {
+      this.timeout(4000);
       request
       .post(url + '/delUser')
       .send({name: 'testUser1'})
@@ -273,6 +283,7 @@ describe('Chaincode REST interface', function() {
       });
     });
     it('should delete second test user', function(done) {
+      this.timeout(4000);
       request
       .post(url + '/delUser')
       .send({name: 'testUser2'})
@@ -282,10 +293,11 @@ describe('Chaincode REST interface', function() {
       assert.property(res.body, 'uuid', 'reply should have uuid');
       setTimeout(function() {
         done();
-      }, 1000);    // hack to give time for the transaction to complete
+      }, 2000);    // hack to give time for the transaction to complete
       });
     });
     it('both test users should be gone', function(done) {
+      this.timeout(4000);
       request
       .get(url + '/userList')
       .end(function(err, res) {

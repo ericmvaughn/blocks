@@ -41,7 +41,8 @@ myApp.controller('transactionListCtrl', ['$scope', '$http',
     function($scope, $http) {
   console.log('Get the last 20 transactions');
   $scope.transactionList = [];
-  $http.get(baseUrl + '/chain/transactionList/20').success(function(response) {
+  $http.get(baseUrl + '/chain/transactionList/20000')
+  .success(function(response) {
     $scope.transactionList = response;
   });
   $scope.popup = function(index) {
@@ -57,7 +58,7 @@ myApp.controller('transactionListCtrl', ['$scope', '$http',
 myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http) {
   console.log('Get the last 20 blocks');
   $scope.blockList = [];
-  $http.get(baseUrl + '/chain/blockList/20').success(function(response) {
+  $http.get(baseUrl + '/chain/blockList/20000').success(function(response) {
     $scope.blockList = response;
   });
   $scope.popup = function(index) {
