@@ -1,8 +1,15 @@
+var debug = require('debug')('blocks');
 var ProtoBuf = require('protobufjs');
 
 var builder = ProtoBuf.loadProtoFile(
               './node_modules/hfc/lib/protos/fabric.proto');    // Creates the Builder
 var PROTOS = builder.build('protos');                            // Returns just the 'js' namespace if that's all we need
+var rest = require('rest');
+var mime = require('rest/interceptor/mime');
+var errorCode = require('rest/interceptor/errorCode');
+var restClient = rest.wrap(mime).wrap(errorCode, {code: 400});
+var restUrl = 'http://localhost:5000';
+var Q = require('q');
 
 var decodePayload = function(transaction) {
   var payload;
@@ -57,7 +64,75 @@ var decodeBlock = function(block) {
   return newBlock;
 };
 
+var updateChain = function(height) {
+  debug('Calling the REST endpoint GET /chain/');
+  return restClient(restUrl + '/chain/')
+  .then(function(response) {
+    debug(response.entity);
+    debug('Returning height of ' + response.entity.height);
+    return response.entity.height;
+  }, function(response) {
+    console.log(response);
+    console.log('Error path: There was an error getting the chain_stats:',
+                response.status.code, response.entity.Error);
+  });
+};
+
+var getFormattedBlock = function(id) {
+  return restClient(restUrl + '/chain/blocks/' + id)
+  .then(function(response) {
+    var value = response.entity;
+    value = decodeBlock(value);
+    return {id: id, block: value};
+  });
+};
+
+var buildBlockList = function(start, end) {
+  var promises = [];
+  var max = 120;  //maximum number of blocks to request
+  for (var i = start; i < end && i < start + max; i++) {
+    promises.push(getFormattedBlock(i));
+  }
+  return Q.all(promises);
+};
+
+var blockListChunk = function(inputObj) {
+  debug('Getting blocks from ' + inputObj.start + ' to ' + inputObj.end);
+  debug('initialValues length is ' + inputObj.list.length);
+  var stop = 0;
+  if (inputObj.start + inputObj.chunkSize > inputObj.end) {
+    stop = inputObj.end;
+  } else {
+    stop = inputObj.start + inputObj.chunkSize;
+  }
+  return buildBlockList(inputObj.start, stop)
+  .then(function(values) {
+    return {start: inputObj.start + inputObj.chunkSize,
+            end: inputObj.end,
+            chunkSize: inputObj.chunkSize,
+            list: inputObj.list.concat(values)};
+  });
+};
+
+var initialBlockList = function(height) {
+  var values = [];
+  var promises = [];
+  var chunk = 100;
+  for (var i = 1; i < height; i = i + chunk) {
+    promises.push(blockListChunk);
+  }
+
+  var results = Q({start: 1, end: height, chunkSize: chunk, list: values});
+  promises.forEach(function(p) {
+    results = results.then(p);
+  });
+  return results.then(function(inputObj) {return inputObj.list;});
+};
+
 exports.decodePayload = decodePayload;
 exports.decodeChaincodeID = decodeChaincodeID;
 exports.decodeType = decodeType;
 exports.decodeBlock = decodeBlock;
+exports.updateChain = updateChain;
+exports.initialBlockList = initialBlockList;
+exports.buildBlockList = buildBlockList;

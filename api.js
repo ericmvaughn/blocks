@@ -30,7 +30,8 @@ var mime = require('rest/interceptor/mime');
 var errorCode = require('rest/interceptor/errorCode');
 var restClient = rest.wrap(mime).wrap(errorCode, {code: 400});
 
-var  chainHeight = 0;
+var  chainHeight = 1;
+var blockList = [];
 
 // Configure test users
 //
@@ -309,12 +310,53 @@ app.post('/delUser', function(req, res) {
 });
 
 //  Add calls to the fabric rest interface until supportted by the SDK
+//initialize the block list
+var startUpdates = false;
+util.updateChain(chainHeight).then(function(height) {
+  debug('The initial block chain height is ' + height);
+  util.initialBlockList(height).then(function(values) {
+    debug('Initializing the block list with a length of ' + values.length);
+    blockList = values;
+    startUpdates = true;
+  }, function(response) {
+    console.log(response);
+  }).done();
+  chainHeight = height;
+  debug('The initial chainHeight is set to ' + chainHeight);
+}, function(response) {
+  console.log(response);
+  console.log('Error updating the chain height ' + response.error);
+});
+
+// periodically fetch the currnet block height
+setInterval(function() {
+  if (startUpdates === true) {
+    util.updateChain(chainHeight).then(function(height) {
+      debug('Block chain height is ' + height);
+      var last = blockList[blockList.length - 1].id;
+      debug('The end of the block list is ' + last);
+      if (height > last + 1) {
+        util.buildBlockList(last + 1, height).then(function(values) {
+          debug('There are additional blocks of length ' + values.length);
+          Array.prototype.push.apply(blockList, values);  //adds the new blocks to the end of the block list
+        }, function(response) {
+          console.log(response);
+        });
+      }
+      chainHeight = height;
+      debug('The new chain height is ' + chainHeight);
+    }, function(response) {
+      console.log(response);
+      console.log('Error updating the chain height ' + response.error);
+    });
+  }
+}, 15000);
+
 app.get('/chain', function(req, res) {
-  console.log('Display chain stats');
+  debug('Display chain stats');
   restClient(restUrl + '/chain/')
   .then(function(response) {
     debug(response.entity);
-    chainHeight = response.entity.height;
     res.json(response.entity);
   }, function(response) {
     console.log(response);
@@ -365,58 +407,29 @@ app.get('/payload/:id', function(req, res) {
   });
 });
 
-var getFormattedBlock = function(id) {
-  return restClient(restUrl + '/chain/blocks/' + id)
-  .then(function(response) {
-    var value = response.entity;
-    var len = value.transactions.length;
-    value = util.decodeBlock(value);
-    return {id: id, block: value};
-  });
-};
-
-var blockList = [];
-
-var buildBlockList = function(height) {
-  var promises = [];
-  for (var i = 1; i < chainHeight; i++) {
-    promises.push(getFormattedBlock(i));
-  }
-  return Q.all(promises);
-};
-
 app.get('/chain/blockList/:id', function(req, res) {
   console.log('build a list of n blocks');
   var id = req.params.id;
-  buildBlockList(chainHeight).then(function(values) {
-    blockList = values;
-    if (chainHeight > id) {
-      res.json(blockList.slice(-id).reverse());
-    } else {
-      res.json(blockList.slice(0, chainHeight).reverse());
-    }
-  }, function(response) {
-    console.log('Error building the blockList ' + response.entity.Error);
-    res.send(response.entity.Error);
-  }).done();
+  if (chainHeight > id) {
+    res.json(blockList.slice(-id).reverse());
+  } else {
+    res.json(blockList.slice(0, chainHeight).reverse());
+  }
 });
 
 app.get('/chain/transactionList/:id', function(req, res) {
   var list = [];
   var count = 0;
   var len = blockList.length;
-  for (var i = 1; i < len && count < req.params.id; i++) {
+  var findUUID = function(r) {
+    return r.uuid === transaction.uuid;
+  };
+  for (var i = 0; i < len && count < req.params.id; i++) {
     var block = blockList[i].block;
     var transLen = block.transactions.length;
-    console.log('number of transactions in this block ' + transLen);
     for (var j = 0; j < transLen; j++) {
       var transaction = block.transactions[j];
-      var result;
-      for (var k = 0; k < transLen; k++) {
-        if (block.nonHashData.transactionResults[k].uuid === transaction.uuid) {
-          result = block.nonHashData.transactionResults[k];
-        }
-      }
+      var result = block.nonHashData.transactionResults.find(findUUID);
       list.push({transaction: transaction, result: result});
       count++;
     }

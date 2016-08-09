@@ -310,3 +310,43 @@ describe('Chaincode REST interface', function() {
     });
   });
 });
+
+describe('Blockchain utilities', function() {
+  describe('updateChain()', function() {
+    it('updateChain should update the chain height', function(done) {
+      this.timeout(30000);
+      //var origHeight = util.updateChain();
+      var origHeight = 0;
+      util.updateChain(origHeight).then(function(height){
+        console.log('origHeight is ' + height);
+        origHeight = height;
+      }, function(response) {
+        console.log(response);
+        console.log('Error updating the chain height ' + response.error);
+      });
+      //console.log('origHeight is ' + origHeight);
+      // issue a dummy transfer to create a new block
+      request
+      .post(url + '/transfer')
+      .send({fromName: 'bogus1', toName: 'bogus2', amount: '10'})
+      .end(function(err, res) {
+        assert.isNull(err);
+        setTimeout(function() {
+          var newHeight = 0;
+          util.updateChain(newHeight).then(function(height){
+            console.log('the newHeight is ' + height);
+            newHeight = height;
+            assert.equal(newHeight, origHeight + 1,
+              'the blockchain height should increase by 1');
+            done();
+            }, function(response) {
+              console.log(response);
+              console.log('Error updating the chain height ' + response.error);
+              assert.isNull(response);
+              done();
+            });
+          }, 2000);    // hack to give time for the transaction to complete
+        });
+      });
+    });
+  });
