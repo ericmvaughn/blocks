@@ -441,6 +441,29 @@ app.get('/chain/transactionList/:id', function(req, res) {
   }
 });
 
+app.get('/userHistory/:user', function(req, res) {
+  var list = [];
+  var len = blockList.length;
+  var findUUID = function(r) {
+    return r.uuid === transaction.uuid;
+  };
+  var findUser = function(r) {
+    return r.payload.chaincodeSpec.ctorMsg.args.indexOf(req.params.user) > -1;
+  };
+  for (var i = 0; i < len; i++) {
+    var block = blockList[i].block;
+    var transLen = block.transactions.length;
+    for (var j = 0; j < transLen; j++) {
+      if (findUser(block.transactions[j])) {
+        var transaction = block.transactions[j];
+        var result = block.nonHashData.transactionResults.find(findUUID);
+        list.push({transaction: transaction, result: result});
+      }
+    }
+  }
+  res.json(list.slice().reverse());
+});
+
 app.use(function(err, req, res, next) {
   console.log('unhandled error detected: ' + err.message);
   res.type('text/plain');

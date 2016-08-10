@@ -106,11 +106,32 @@ myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http) {
   $scope.update = function() {
     $http.get(baseUrl + '/userList').then(function(response) {
       $scope.userList = angular.fromJson(response.data);
+      console.log(Object.keys($scope.userList));
+      $scope.selectedUser = Object.keys($scope.userList)[0];
+      $scope.selectUser($scope.selectedUser);
     }, function(response) {
       console.log('an error happened on getting the user list');
     });
   };
   $scope.update();  //running this function to populate the list on the initial load
+
+  $scope.selectUser = function(user) {
+    //console.log(user + ' selected');
+    $scope.selectedUser = user;
+    if (user) {
+      $http.get(baseUrl + '/userHistory/' + user).then(function(response) {
+        $scope.userHistory = angular.fromJson(response.data);
+      }, function(error) {
+        console.log('Error getting the user history');
+        console.log(error);
+      });
+    } else {
+      $scope.userHistory = [];
+    }
+  };
+  $scope.popup = function(index) {
+    $scope.popupTransaction = $scope.userHistory[index];
+  };
 }]).directive('userList', function() {
   return {
     controller: 'userListCtrl',

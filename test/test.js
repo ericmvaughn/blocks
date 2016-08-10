@@ -269,6 +269,30 @@ describe('Chaincode REST interface', function() {
       });
     });
   });
+  describe('/userHistory/testUser1', function() {
+    it('should return a transaction list for the given user', function(done) {
+      request
+      .get(url + '/userHistory/' + 'testUser1')
+      .end(function(err, res) {
+        assert.isNull(err);
+        assert.equal(res.status, 200, 'should recieve a 200 status');
+        assert.isArray(res.body, 'should return list of transactions');
+        assert.isAtLeast(res.body.length, 2,
+          'there should be at least 2 transactions in the list');
+        assert.property(res.body[0], 'transaction',
+          'a memeber of the array should contain a transaction');
+        assert.property(res.body[0], 'result',
+          'a memeber of the array should contain a result');
+        assert.property(res.body[0].transaction, 'type',
+          'a memeber of the array should contain a type');
+        assert.property(res.body[0].transaction, 'payload',
+          'a transaction should have a payload');
+        assert.include(res.body[0].transaction.payload.chaincodeSpec.ctorMsg.args, 'testUser1',
+          'the function args should contain testUser1');
+        done();
+      });
+    });
+  });
   describe('/delUser', function() {
     it('should delete a user', function(done) {
       this.timeout(4000);
@@ -318,7 +342,7 @@ describe('Blockchain utilities', function() {
       //var origHeight = util.updateChain();
       var origHeight = 0;
       util.updateChain(origHeight).then(function(height){
-        console.log('origHeight is ' + height);
+        //console.log('origHeight is ' + height);
         origHeight = height;
       }, function(response) {
         console.log(response);
@@ -334,7 +358,7 @@ describe('Blockchain utilities', function() {
         setTimeout(function() {
           var newHeight = 0;
           util.updateChain(newHeight).then(function(height){
-            console.log('the newHeight is ' + height);
+            //console.log('the newHeight is ' + height);
             newHeight = height;
             assert.equal(newHeight, origHeight + 1,
               'the blockchain height should increase by 1');
@@ -350,3 +374,21 @@ describe('Blockchain utilities', function() {
       });
     });
   });
+
+describe('Block list utilities', function() {
+  describe('initialBlockList', function() {
+    it('should return 10 blocks if height is set to 11', function(done) {
+      //testing...
+      util.initialBlockList(11).then(function(list) {
+        assert.isArray(list, 'should return list of blocks');
+        assert.equal(list.length, 10, 'there should be 10 blocks');
+        assert.property(list[9], 'id', 'should contain an id field');
+        assert.equal(list[9].id, 10, 'the id of the last block should be 10');
+        done();
+      }, function(response) {
+        assert.isNull(response);
+        done();
+      }).done();
+    });
+  });
+});
