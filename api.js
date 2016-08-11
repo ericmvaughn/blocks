@@ -260,6 +260,39 @@ app.post('/addUser', function(req, res) {
   });
 });
 
+app.post('/verifyBalance', function(req, res) {
+  debug(req.body);
+  var name = req.body.name;
+  var balance = req.body.balance;
+  var queryRequest = {
+    chaincodeID: chaincodeID,  // Name (hash) required for query
+    fcn: 'users',  // Function to trigger
+    args: []
+  };
+  // Trigger the query transaction
+  userMember1.setTCertBatchSize(1);
+  var queryTx = userMember1.query(queryRequest);
+  queryTx.on('complete', function(results) {      // Query completed successfully
+    debug(results);
+    var list = JSON.parse(results.result);
+    console.log(list);
+    debug(name);
+    debug(list[name]);
+    if (Object.keys(list).indexOf(name) == -1) {
+      res.json({errorCode: 1, error: 'invalid name'});
+    } else if (list[name] == balance) {
+      res.json({errorCode: 0, error: 'verified'});
+    } else {
+      res.json({errorCode: 2, error: 'incorrect balance'});
+    }
+  });
+  queryTx.on('error', function(err) {     // Query failed
+    debug(err);
+    console.log('Failed to query existing chaincode state:  ', err);
+    res.send('Error: ' + err);
+  });
+});
+
 app.post('/transfer', function(req, res) {
   console.log('transfer request body');
   console.log(req.body);

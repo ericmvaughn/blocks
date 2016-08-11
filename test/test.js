@@ -293,6 +293,53 @@ describe('Chaincode REST interface', function() {
       });
     });
   });
+  describe('/verifyBalance/', function() {
+    it('should be able to verify the correct user balance', function(done) {
+      this.timeout(4000);
+      request
+      .post(url + '/verifyBalance')
+      .send({name: 'testUser1', balance: '90'})
+      .end(function(err, res) {
+        assert.isNull(err);
+        assert.equal(res.status, 200, 'should recieve a 200 status');
+        assert.property(res.body, 'errorCode', 'response should have an errorCode');
+        assert.equal(res.body.errorCode, 0, 'should return a 0 for correctly verifing the balance');
+        assert.property(res.body, 'error', 'response should have an error description');
+        assert.equal(res.body.error, 'verified', 'should return verified');
+        done();
+      });
+    });
+    it('should report an error for an incorrect user balance', function(done) {
+      this.timeout(4000);
+      request
+      .post(url + '/verifyBalance')
+      .send({name: 'testUser1', balance: '1000'})
+      .end(function(err, res) {
+        assert.isNull(err);
+        assert.equal(res.status, 200, 'should recieve a 200 status');
+        assert.property(res.body, 'errorCode', 'response should have an errorCode');
+        assert.equal(res.body.errorCode, 2, 'should return a 2 for incorrect balance');
+        assert.property(res.body, 'error', 'response should have an error description');
+        assert.equal(res.body.error, 'incorrect balance', 'should return incorrect balance');
+        done();
+      });
+    });
+    it('should report an error for an incorrect user name', function(done) {
+      this.timeout(4000);
+      request
+      .post(url + '/verifyBalance')
+      .send({name: 'testUser10', balance: '90'})
+      .end(function(err, res) {
+        assert.isNull(err);
+        assert.equal(res.status, 200, 'should recieve a 200 status');
+        assert.property(res.body, 'errorCode', 'response should have an errorCode');
+        assert.equal(res.body.errorCode, 1, 'should return a 2 for incorrect balance');
+        assert.property(res.body, 'error', 'response should have an error description');
+        assert.equal(res.body.error, 'invalid name', 'should return incorrect balance');
+        done();
+      });
+    });
+  });
   describe('/delUser', function() {
     it('should delete a user', function(done) {
       this.timeout(4000);
