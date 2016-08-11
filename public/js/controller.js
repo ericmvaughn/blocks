@@ -171,6 +171,30 @@ myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http) {
   };
 });
 
+myApp.controller('verifyBalanceCtrl',
+  ['$scope', '$http', function($scope, $http) {
+  $scope.submit = function() {
+    var data = {
+      'name': $scope.user,
+      'balance': $scope.balance
+    };
+    $http.post(baseUrl + '/verifyBalance', data).then(function(response) {
+      console.log('response from the verifyBalance post ');
+      console.log(response);
+      if (response.data !== null) {
+        $scope.result = response.data;
+      }
+    }, function(response) {
+      console.log('an error happened on the $http.post');
+    });
+  };
+}]).directive('verifyBalance', function() {
+  return {
+    controller: 'verifyBalanceCtrl',
+    templateUrl: 'templates/verifyBalance.html'
+  };
+});
+
 myApp.controller('delUserCtrl', ['$scope', '$http', function($scope, $http) {
   $scope.submit = function() {
     var data = {

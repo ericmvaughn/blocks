@@ -1,0 +1,15 @@
+<h1 class="page-header">Verify Balance</h1>
+
+
+<form class="form-inline" ng-submit="submit()">
+  <div class="form-group">
+    <label for="verifyBalanceInputName">Name</label>
+    <input type="text" class="form-control" id="verifyBalanceInputName" ng-model="user" placeholder="Enter name">
+  </div>
+  <div class="form-group">
+    <label for="verifyBalanceInputBalance">Balance</label>
+    <input type="text" class="form-control" id="verifyBalanceInputBalance" ng-model="balance" placeholder="Balance to check">
+  </div>
+  <button type="submit" class="btn btn-default">Verify</button> &nbsp;&nbsp;
+  <span class="text-capitalize" ng-class="{'text-success': result.errorCode == 0, 'text-danger': result.errorCode > 0}" style="font-size: 200%"> {{result.error}}</span>
+</form>

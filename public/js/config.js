@@ -29,6 +29,9 @@ angular.
         when('/addUser', {
           template: '<add-user></add-user>'
         }).
+        when('/verifyBalance', {
+          template: '<verify-balance></verify-balance>'
+        }).
         when('/delUser', {
           template: '<del-user></del-user>'
         }).
