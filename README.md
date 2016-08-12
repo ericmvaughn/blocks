@@ -1,29 +1,13 @@
-# Example app
+# ibm-blockchain-js Example app
 
 This project is an example app demonstrating some of the Hyperledger/fabric
 capabilities.
 
-## Installation
+This particular branch uses the ibm-blockchain-js node interface and was created
+to save the files needed for it before deleting them in the master branch.
 
-`git clone https://github.com/ericmvaughn/blocks.git`
+app.js is the primary file.
 
-```
-npm install -g gulp
-npm install -g mocha
-```
-
-
-## Setting up testing blockchain
-
-### Vagrant
-
-### Bluemix
-
-
-## Testing
-
-
-`gulp test`
 
 ## Acknowledgement
 This project was based heavily on the IBM Marbles example and the Hyperledger
