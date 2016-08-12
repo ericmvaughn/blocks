@@ -2,6 +2,7 @@ var assert = require('chai').assert;
 var request =require('superagent');
 var util = require('../util.js');
 var validBlock = require('./valid-block.json');
+var transactions = require('./transactions.json').transactions;
 var url = 'http://localhost:3000';
 
 describe('ProtoBuf', function() {
@@ -437,5 +438,42 @@ describe('Block list utilities', function() {
         done();
       }).done();
     });
+  });
+});
+
+describe('calcBalance function', function() {
+  it('should return 100 from an init transaction', function() {
+    var tx = transactions[0];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 0);
+    assert.equal(newBalance, 100, 'should be 100');
+  });
+  it('should leave the balance unchanged if there are errors ', function() {
+    var tx = transactions[1];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 100);
+    assert.equal(newBalance, 100, 'should still be 100');
+    var tx = transactions[0];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'bogus', 10);
+    assert.equal(newBalance, 10,
+      'should return the input balance if user not found');
+  });
+  it('TX transfer a,b,10 should reduce the balance by 10', function() {
+    var tx = transactions[2];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 100);
+    assert.equal(newBalance, 90, 'after transfer a,b,10 balance should be 90');
+  });
+  it('TX transfer c,a,20 should increase the balance by 20', function() {
+    var tx = transactions[3];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 100);
+    assert.equal(newBalance, 120, 'after transfer c,a,20 balance should be 120');
+  });
+  it('TX delete a should return a balance of 0', function() {
+    var tx = transactions[4];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 100);
+    assert.equal(newBalance, 0, 'after delete balance should be 0');
+  });
+  it('TX new a,300 should return a balance of 300', function() {
+    var tx = transactions[5];
+    var newBalance = util.calcBalance(tx.transaction, tx.result, 'a', 100);
+    assert.equal(newBalance, 300, 'balance should be 300');
   });
 });

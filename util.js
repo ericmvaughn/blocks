@@ -129,6 +129,34 @@ var initialBlockList = function(height) {
   return results.then(function(inputObj) {return inputObj.list;});
 };
 
+var calcBalance = function(transaction, result, user, oldBalance) {
+  var ctorMsg = transaction.payload.chaincodeSpec.ctorMsg;
+  if (result.errorCode || ctorMsg.args.indexOf(user) == -1) {  //check for an error
+    return oldBalance;
+  }
+  switch (ctorMsg.function) {
+    case 'init':
+      newBalance = ctorMsg.args[ctorMsg.args.indexOf(user) + 1];
+      break;
+    case 'new':
+      newBalance = ctorMsg.args[1];
+      break;
+    case 'delete':
+      newBalance = 0;
+      break;
+    case 'transfer':
+      if (ctorMsg.args.indexOf(user) === 0) {
+        newBalance = oldBalance - Number(ctorMsg.args[2]);
+      } else {
+        newBalance = oldBalance + Number(ctorMsg.args[2]);
+      }
+      break;
+    default:
+      newBalance = oldBalance;  //don't change anything if the function is unknown
+  }
+  return newBalance;
+};
+
 exports.decodePayload = decodePayload;
 exports.decodeChaincodeID = decodeChaincodeID;
 exports.decodeType = decodeType;
@@ -136,3 +164,4 @@ exports.decodeBlock = decodeBlock;
 exports.updateChain = updateChain;
 exports.initialBlockList = initialBlockList;
 exports.buildBlockList = buildBlockList;
+exports.calcBalance = calcBalance;
