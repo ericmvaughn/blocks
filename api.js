@@ -76,26 +76,40 @@ store.getValue('chaincodeID', function(err, value) {
 
 // load bluemix credentials from file-based
 var bluemix = require('./cred-blockchain-ma.json');
+var cred = require('./cred-local.json');
 
 // URL for the REST interface to the peer
-var restUrl = 'http://localhost:5000';
+//var restUrl = 'http://localhost:5000';
+var restUrl = cred.peers[0].api_url;
 // var restUrl = bluemix.credentials.peers[2].api_url;
 // var netId = bluemix.credentials.peers[2].network_id;
-//var caUrl = bluemix.credentials.ca.
 
 // Set the URL for member services
-chain.setMemberServicesUrl('grpc://localhost:50051');
-// TODO add code to look up the ca url from the credentials file.
-// chain.setMemberServicesUrl('grpc://ffa1d5bd-8020-45f2-a2af-1f95075613d0_ca.blockchain.ibm.com:30304');
+//chain.setMemberServicesUrl('grpc://localhost:50051');
+var caName = Object.keys(cred.ca)[0];
+var ca = cred.ca[caName];
+debug(caName);
+debug('grpc://' + ca.url);
+chain.setMemberServicesUrl('grpc://' + ca.url);
 // Add a peer's URL
-chain.addPeer('grpc://localhost:30303');
+for (var i = 0; i < cred.peers.length; i++) {
+  var peer = cred.peers[i];
+  debug('grpc://' + peer.discovery_host + ':' + peer.discovery_port);
+  chain.addPeer('grpc://' + peer.discovery_host + ':' + peer.discovery_port);
+}
+//chain.addPeer('grpc://localhost:30303');
 
+// search the user list for WebAppAdmin and return the password
+var user = cred.users.find(function(u) {
+  return u.username == 'WebAppAdmin';
+});
+debug(user.secret);
 // Enroll "WebAppAdmin" which is already registered because it is
 // listed in fabric/membersrvc/membersrvc.yaml with it's one time password.
 // If "WebAppAdmin" has already been registered, this will still succeed
 // because it stores the state in the KeyValStore
 // (i.e. in '/tmp/keyValStore' in this sample).
-chain.enroll('WebAppAdmin', 'DJY27pEnl16d', function(err, webAppAdmin) {
+chain.enroll('WebAppAdmin', user.secret, function(err, webAppAdmin) {
   if (err) {
     return console.log('ERROR: failed to register ', err);
   }
