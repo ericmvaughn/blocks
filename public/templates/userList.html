@@ -33,6 +33,7 @@
               <th>Time</th>
               <th>Type</th>
               <th>Playload </th>
+              <th>Balance</th>
               <th>Chaincode ID</th>
               <th>Error code</th>
               <th>Error description</th>
@@ -44,6 +45,7 @@
               <td>{{tx.transaction.timestamp.seconds * 1000 | date:"medium"}}</td>
               <td>{{tx.transaction.type}}</td>
               <td>{{tx.transaction.payload.chaincodeSpec.ctorMsg.function}}: &nbsp;&nbsp; {{tx.transaction.payload.chaincodeSpec.ctorMsg.args}}</td>
+              <td>{{tx.balance}}</td>
               <td>{{tx.transaction.chaincodeID.name | limitTo:30}}</td>
               <td>{{tx.result.errorCode}}</td>
               <td>{{tx.result.error}}</td>

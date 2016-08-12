@@ -146,9 +146,9 @@ var calcBalance = function(transaction, result, user, oldBalance) {
       break;
     case 'transfer':
       if (ctorMsg.args.indexOf(user) === 0) {
-        newBalance = oldBalance - Number(ctorMsg.args[2]);
+        newBalance = Number(oldBalance) - Number(ctorMsg.args[2]);
       } else {
-        newBalance = oldBalance + Number(ctorMsg.args[2]);
+        newBalance = Number(oldBalance) + Number(ctorMsg.args[2]);
       }
       break;
     default:
