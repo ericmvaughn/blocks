@@ -48,9 +48,6 @@ var userMember1;
 // Path to the local directory containing the chaincode project under $GOPATH
 var chaincodePath = 'github.com/blocks_chaincode/';
 
-// testChaincodeID will store the chaincode ID value after deployment.
-// set it to the current value for now so we don't need to do a deploy each run
-//var chaincodeID = '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695';
 var chaincodeID;
 
 // Initializing values for chaincode parameters
@@ -64,15 +61,10 @@ var chain = hlc.newChain('targetChain');
 
 // Configure the KeyValStore which is used to store sensitive keys
 // as so it is important to secure this storage.
-// The FileKeyValStore is a simple file-based KeyValStore, but you
-// can easily implement your own to store whereever you want.
+// The FileKeyValStore is a simple file-based KeyValStore.
 chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
 var store = chain.getKeyValStore();
-// store.setValue('chaincodeID',
-//           '3ee9582aca17f49566a46e3f945385571ce778c20a3837790714bd22cb7f2695',
-//           function(err){
-//             if(err) console.log('error saving chaincodeid. ' + err);
-//           });
+
 store.getValue('chaincodeID', function(err, value) {
   if (err) {
     console.log('error getting chaincodeID ' + err);
@@ -83,7 +75,7 @@ store.getValue('chaincodeID', function(err, value) {
 });
 
 // load bluemix credentials from file-based
-var bluemix = require('./cred-blockchain-of.json');
+var bluemix = require('./cred-blockchain-ma.json');
 
 // URL for the REST interface to the peer
 var restUrl = 'http://localhost:5000';
@@ -146,7 +138,6 @@ app.use(bodyparser.json());
 
 app.get('/', function(req, res) {
   debug('Display basic home page.');
-
   res.sendfile('./public/menu.html');
 });
 
@@ -154,9 +145,7 @@ app.get('/', function(req, res) {
 app.get('/deploy', function(req, res) {
   // Construct the deploy request
   var deployRequest = {
-    // Function to trigger
     fcn: 'init',
-    // Arguments to the initializing function
     args: ['a', initA, 'b', initB]
   };
 
@@ -168,7 +157,7 @@ app.get('/deploy', function(req, res) {
   // Print the deploy results
   deployTx.on('complete', function(results) {
     // Deploy request completed successfully
-    console.log('eploy results: ' + results);
+    console.log('deploy results: ' + results);
     // Set the testChaincodeID for subsequent tests
     chaincodeID = results.chaincodeID;
     store.setValue('chaincodeID',
