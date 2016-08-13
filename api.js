@@ -18,6 +18,7 @@ var app = require('express')();
 var morgan = require('morgan');
 var bodyparser = require('body-parser');
 var atob = require('atob');
+var fs = require('fs');
 var ProtoBuf = require('protobufjs');
 var util = require('./util.js');
 //var ByteBuffer = require("bytebuffer");
@@ -63,6 +64,7 @@ var chain = hlc.newChain('targetChain');
 // as so it is important to secure this storage.
 // The FileKeyValStore is a simple file-based KeyValStore.
 chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
+// chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/bluemixKeyValStore'));
 var store = chain.getKeyValStore();
 
 store.getValue('chaincodeID', function(err, value) {
@@ -74,9 +76,14 @@ store.getValue('chaincodeID', function(err, value) {
   }
 });
 
+// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 // load bluemix credentials from file-based
-var bluemix = require('./cred-blockchain-ma.json');
+// var cred = require('./cred-blockchain-ma.json');
+// var grpc = 'grpcs://';
+
+//  local config no TLS
 var cred = require('./cred-local.json');
+var grpc = 'grpc://';
 
 // URL for the REST interface to the peer
 //var restUrl = 'http://localhost:5000';
@@ -89,29 +96,50 @@ var restUrl = cred.peers[0].api_url;
 var caName = Object.keys(cred.ca)[0];
 var ca = cred.ca[caName];
 debug(caName);
-debug('grpc://' + ca.url);
-chain.setMemberServicesUrl('grpc://' + ca.url);
+debug(grpc + ca.url);
+var cert;
+// the next line was recommended in issue #2373
+chain.setECDSAModeForGRPC(true);
+
+if (fs.existsSync('Not.Found.us.blockchain.ibm.com.cert')) {
+  debug('found cert');
+  cert = fs.readFileSync('us.blockchain.ibm.com.cert');
+}
+
+if (cert) {
+  chain.setMemberServicesUrl(grpc + ca.url, cert);
+} else {
+  chain.setMemberServicesUrl(grpc + ca.url);
+}
+debug(cert);
+
 // Add a peer's URL
 for (var i = 0; i < cred.peers.length; i++) {
   var peer = cred.peers[i];
-  debug('grpc://' + peer.discovery_host + ':' + peer.discovery_port);
-  chain.addPeer('grpc://' + peer.discovery_host + ':' + peer.discovery_port);
+  var url = grpc + peer.discovery_host + ':' + peer.discovery_port;
+  debug(url);
+  if (cert) {
+    chain.addPeer(url, cert);
+  } else {
+    chain.addPeer(url);
+  }
 }
 //chain.addPeer('grpc://localhost:30303');
+// jscs:enable requireCamelCaseOrUpperCaseIdentifiers
 
 // search the user list for WebAppAdmin and return the password
-var user = cred.users.find(function(u) {
+var credUser = cred.users.find(function(u) {
   return u.username == 'WebAppAdmin';
 });
-debug(user.secret);
+debug(credUser.secret);
 // Enroll "WebAppAdmin" which is already registered because it is
 // listed in fabric/membersrvc/membersrvc.yaml with it's one time password.
 // If "WebAppAdmin" has already been registered, this will still succeed
 // because it stores the state in the KeyValStore
 // (i.e. in '/tmp/keyValStore' in this sample).
-chain.enroll('WebAppAdmin', user.secret, function(err, webAppAdmin) {
+chain.enroll('WebAppAdmin', credUser.secret, function(err, webAppAdmin) {
   if (err) {
-    return console.log('ERROR: failed to register ', err);
+    return console.log('ERROR: failed to register webAppAdmin', err);
   }
   // Successfully enrolled WebAppAdmin during initialization.
   // Set this user as the chain's registrar which is authorized to register other users.
@@ -120,7 +148,20 @@ chain.enroll('WebAppAdmin', user.secret, function(err, webAppAdmin) {
   //listenForUserRequests();
   var theReg = chain.getRegistrar().getName();
   debug('The registrar is ' + theReg);
+  //debug(webAppAdmin);
 
+  //  For bluemix use an already defined user and just call enroll
+  // var user3 = cred.users[3];
+  // chain.enroll(user3.enrollId, user3.enrollSecret, function(err, user) {
+  //   if (err) {
+  //     return console.log('getUser error: ' + err);
+  //   }
+  //   if (user.isEnrolled()) {
+  //     userMember1 = user;
+  //     return;
+  //   }
+  // });
+  // the code below is used to register and enroll a user for the local config
   chain.getUser(user1.name, function(err, user) {
     if (err) {
       return console.log('getUser error: ' + err);
@@ -129,12 +170,14 @@ chain.enroll('WebAppAdmin', user.secret, function(err, webAppAdmin) {
       userMember1 = user;
       return;
     }
+    debug(user);
     // User is not enrolled yet, so perform both registration and enrollment
     var registrationRequest = {
       registrar: 'WebAppAdmin',
       enrollmentID: user1.name,
-      account: 'bank_a',
-      affiliation: '00001'
+      //role: user1.role, // Client
+      account: user1.account,
+      affiliation: user1.affiliation
     };
     user.registerAndEnroll(registrationRequest, function(err) {
       if (err) {
@@ -482,6 +525,9 @@ app.get('/userHistory/:user', function(req, res) {
   var len = blockList.length;
   var balance = 0;
   var user = req.params.user;
+  var findUUID = function(r) {
+    return r.uuid === tx.uuid;
+  };
   var findUser = function(r) {
     return r.payload.chaincodeSpec.ctorMsg.args.indexOf(user) > -1;
   };
@@ -491,9 +537,7 @@ app.get('/userHistory/:user', function(req, res) {
     for (var j = 0; j < transLen; j++) {
       if (findUser(block.transactions[j])) {
         var tx = block.transactions[j];
-        var result = block.nonHashData.transactionResults.find(function(r) {
-          return r.uuid === tx.uuid;
-        });
+        var result = block.nonHashData.transactionResults.find(findUUID);
         var newBalance = util.calcBalance(tx, result, user, balance);
         list.push({transaction: tx, result: result, balance: newBalance});
         balance = newBalance;
