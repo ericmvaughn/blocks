@@ -47,7 +47,8 @@ user1 = {
 var userMember1;
 
 // Path to the local directory containing the chaincode project under $GOPATH
-var chaincodePath = 'github.com/blocks_chaincode/';
+//var chaincodePath = 'github.com/blocks_chaincode/';  //local config
+var chaincodePath = 'github.com/blocks_cc/';  // bluemix config
 
 var chaincodeID;
 
@@ -63,8 +64,8 @@ var chain = hlc.newChain('targetChain');
 // Configure the KeyValStore which is used to store sensitive keys
 // as so it is important to secure this storage.
 // The FileKeyValStore is a simple file-based KeyValStore.
-chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
-// chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/bluemixKeyValStore'));
+// chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
+chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/bluemixKeyValStore'));
 var store = chain.getKeyValStore();
 
 store.getValue('chaincodeID', function(err, value) {
@@ -72,24 +73,22 @@ store.getValue('chaincodeID', function(err, value) {
     console.log('error getting chaincodeID ' + err);
   }
   if (value) {
-    chaincodeID = value;
+    chaincodeID = value.trim();
   }
 });
 
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 // load bluemix credentials from file-based
-// var cred = require('./cred-blockchain-ma.json');
-// var grpc = 'grpcs://';
+var cred = require('./cred-blockchain-ma.json');
+var grpc = 'grpcs://';
 
 //  local config no TLS
-var cred = require('./cred-local.json');
-var grpc = 'grpc://';
+// var cred = require('./cred-local.json');
+// var grpc = 'grpc://';
 
 // URL for the REST interface to the peer
 //var restUrl = 'http://localhost:5000';
 var restUrl = cred.peers[0].api_url;
-// var restUrl = bluemix.credentials.peers[2].api_url;
-// var netId = bluemix.credentials.peers[2].network_id;
 
 // Set the URL for member services
 //chain.setMemberServicesUrl('grpc://localhost:50051');
@@ -101,7 +100,7 @@ var cert;
 // the next line was recommended in issue #2373
 chain.setECDSAModeForGRPC(true);
 
-if (fs.existsSync('Not.Found.us.blockchain.ibm.com.cert')) {
+if (fs.existsSync('us.blockchain.ibm.com.cert')) {
   debug('found cert');
   cert = fs.readFileSync('us.blockchain.ibm.com.cert');
 }
@@ -151,8 +150,18 @@ chain.enroll('WebAppAdmin', credUser.secret, function(err, webAppAdmin) {
   //debug(webAppAdmin);
 
   //  For bluemix use an already defined user and just call enroll
-  // var user3 = cred.users[3];
-  // chain.enroll(user3.enrollId, user3.enrollSecret, function(err, user) {
+  var user3 = cred.users[3];
+  chain.enroll(user3.enrollId, user3.enrollSecret, function(err, user) {
+    if (err) {
+      return console.log('user_type1 enroll error: ' + err);
+    }
+    if (user.isEnrolled()) {
+      userMember1 = user;
+      return;
+    }
+  });
+  // the code below is used to register and enroll a user for the local config
+  // chain.getUser(user1.name, function(err, user) {
   //   if (err) {
   //     return console.log('getUser error: ' + err);
   //   }
@@ -160,32 +169,22 @@ chain.enroll('WebAppAdmin', credUser.secret, function(err, webAppAdmin) {
   //     userMember1 = user;
   //     return;
   //   }
+  //   debug(user);
+  //   // User is not enrolled yet, so perform both registration and enrollment
+  //   var registrationRequest = {
+  //     registrar: 'WebAppAdmin',
+  //     enrollmentID: user1.name,
+  //     //role: user1.role, // Client
+  //     account: user1.account,
+  //     affiliation: user1.affiliation
+  //   };
+  //   user.registerAndEnroll(registrationRequest, function(err) {
+  //     if (err) {
+  //       return console.log('registerAndEnroll error: ' + err);
+  //     }
+  //     userMember1 = user;
+  //   });
   // });
-  // the code below is used to register and enroll a user for the local config
-  chain.getUser(user1.name, function(err, user) {
-    if (err) {
-      return console.log('getUser error: ' + err);
-    }
-    if (user.isEnrolled()) {
-      userMember1 = user;
-      return;
-    }
-    debug(user);
-    // User is not enrolled yet, so perform both registration and enrollment
-    var registrationRequest = {
-      registrar: 'WebAppAdmin',
-      enrollmentID: user1.name,
-      //role: user1.role, // Client
-      account: user1.account,
-      affiliation: user1.affiliation
-    };
-    user.registerAndEnroll(registrationRequest, function(err) {
-      if (err) {
-        return console.log('registerAndEnroll error: ' + err);
-      }
-      userMember1 = user;
-    });
-  });
 });
 
 app.use(morgan('dev'));
@@ -199,11 +198,14 @@ app.get('/', function(req, res) {
 });
 
 // provide an endpoint that will deploy the chaincode
+//  TODO  This failed when trying to use bluemix and had to deploy using
+//  Postman with the REST interface.  Althogh that wasn't smooth either
 app.get('/deploy', function(req, res) {
   // Construct the deploy request
   var deployRequest = {
     fcn: 'init',
-    args: ['a', initA, 'b', initB]
+    args: ['a', initA, 'b', initB],
+    certificatePath: '/certs/blockchain-cert.pem'  //added for bluemix
   };
 
   deployRequest.chaincodePath = chaincodePath;
