@@ -145,6 +145,18 @@ myApp.directive('overview', function() {
   };
 });
 
+myApp.directive('blockExplorer', function() {
+  return {
+    templateUrl: 'templates/blockExplorer.html'
+  };
+});
+
+myApp.directive('exampleApp', function() {
+  return {
+    templateUrl: 'templates/exampleApp.html'
+  };
+});
+
 myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http) {
   $scope.submit = function() {
     var data = {

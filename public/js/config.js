@@ -5,6 +5,12 @@ angular.
       $locationProvider.hashPrefix('!');
 
       $routeProvider.
+        when('/blockExplorer', {
+          template: '<block-explorer></block-explorer>'
+        }).
+        when('/exampleApp', {
+          template: '<example-app></example-app>'
+        }).
         when('/blockDetails', {
           template: '<block-details></block-details>'
         }).

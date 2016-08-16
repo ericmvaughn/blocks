@@ -431,7 +431,7 @@ setInterval(function() {
       console.log('Error updating the chain height ' + response.error);
     });
   }
-}, 15000);
+}, 60000);
 
 app.get('/chain', function(req, res) {
   debug('Display chain stats');
