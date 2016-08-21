@@ -100,17 +100,20 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
   };
 });
 
-myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http) {
+myApp.controller('userListCtrl', ['$scope', '$http', '$window', function($scope, $http, $window) {
   console.log('calling the userList endpoint');
 
   $scope.update = function() {
     $http.get(baseUrl + '/userList').then(function(response) {
+      console.log(response.data);
       $scope.userList = angular.fromJson(response.data);
       console.log(Object.keys($scope.userList));
       $scope.selectedUser = Object.keys($scope.userList)[0];
       $scope.selectUser($scope.selectedUser);
     }, function(response) {
       console.log('an error happened on getting the user list');
+      console.log(response.data);
+      $window.alert("Error getting the user list." + response.data);
     });
   };
   $scope.update();  //running this function to populate the list on the initial load
@@ -169,11 +172,13 @@ myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http) {
     $http.post(baseUrl + '/addUser', data).then(function(response) {
       console.log('response from the addUser post ');
       console.log(response);
-      if (response.data.result !== null) {
-        console.log(response.data.result);
+      if (response.data) {
+        console.log(response.data);
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
+      console.log(response.data);
+      $window.alert("Error with Add." + response.data);
     });
   };
 }]).directive('addUser', function() {
@@ -198,6 +203,8 @@ myApp.controller('verifyBalanceCtrl',
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
+      console.log(response.data);
+      $window.alert("Error doing verify: " + response.data);
     });
   };
 }]).directive('verifyBalance', function() {
@@ -222,6 +229,8 @@ myApp.controller('delUserCtrl', ['$scope', '$http', function($scope, $http) {
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
+      console.log(response.data);
+      $window.alert("Error doing delete: " + response.data);
     });
   };
 }]).directive('delUser', function() {
@@ -245,11 +254,13 @@ myApp.controller('transferCtrl', ['$scope', '$http', function($scope, $http) {
     $http.post(baseUrl + '/transfer', data).then(function(response) {
       console.log('response from the transfer post ');
       console.log(response);
-      if (response.data.result !== null) {
-        console.log(response.data.result);
+      if (response.data) {
+        console.log(response.data);
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
+      console.log(response.data);
+      $window.alert("Error doing transfer: " + response.data);
     });
   };
 }]).directive('transfer', function() {

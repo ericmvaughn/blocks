@@ -259,8 +259,8 @@ app.get('/userList', function(req, res) {
     // Existing state variable to retrieve
     args: []
   };
-  // Trigger the query transaction
-  userMember1.setTCertBatchSize(1);
+  // Leave the TCert batch size set to the default which I think is 200
+  //userMember1.setTCertBatchSize(1);
   var queryTx = userMember1.query(queryRequest);
   // Print the query results
   queryTx.on('complete', function(results) {
@@ -277,8 +277,8 @@ app.get('/userList', function(req, res) {
   queryTx.on('error', function(err) {
     // Query failed
     debug(err);
-    console.log('Failed to query existing chaincode state:  ', err);
-    res.send('Error: ' + err);
+    console.log('Failed to query existing chaincode state:  ', err.msg);
+    res.status(500).send(err.msg);
   });
 });
 
@@ -304,7 +304,9 @@ app.post('/addUser', function(req, res) {
   });
   invokeTx.on('error', function(err) {
     // Invoke transaction submission failed
-    res.send(err);
+    debug(err);
+    console.log('Failed to invoke addUser: ' + err.msg);
+    res.send(err.msg);
   });
 });
 
@@ -317,8 +319,7 @@ app.post('/verifyBalance', function(req, res) {
     fcn: 'users',  // Function to trigger
     args: []
   };
-  // Trigger the query transaction
-  userMember1.setTCertBatchSize(1);
+
   var queryTx = userMember1.query(queryRequest);
   queryTx.on('complete', function(results) {      // Query completed successfully
     debug(results);
@@ -336,8 +337,8 @@ app.post('/verifyBalance', function(req, res) {
   });
   queryTx.on('error', function(err) {     // Query failed
     debug(err);
-    console.log('Failed to query existing chaincode state:  ', err);
-    res.send('Error: ' + err);
+    console.log('Failed to query existing chaincode state:  ', err.msg);
+    res.send('Error: ' + err.msg);
   });
 });
 
@@ -361,7 +362,9 @@ app.post('/transfer', function(req, res) {
   });
   invokeTx.on('error', function(err) {
     // Invoke transaction submission failed
-    res.send(err);
+    debug(err);
+    console.log('Failed to invoke the transfer: ' + err.msg);
+    res.send(err.msg);
   });
 });
 
@@ -386,7 +389,9 @@ app.post('/delUser', function(req, res) {
   });
   invokeTx.on('error', function(err) {
     // Invoke transaction submission failed
-    res.send(err);
+    debug(err);
+    console.log('Failed to invoke the delUser: ' + err.msg);
+    res.send(err.msg);
   });
 });
 
