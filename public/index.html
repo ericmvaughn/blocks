@@ -42,9 +42,27 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Blockchain</a></li>
-            <li><a href="#">Chaincode</a></li>
-            <li><a href="#">Help</a></li>
+            <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown">Blockchain <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#!/overview">Overview </a></li>
+                <li><a href="#!/chainStats">Chain Stats</a></li>
+                <li><a href="#!/blockDetails">Block Details</a></li>
+                <li><a href="#!/blockList">Block List</a></li>
+                <li><a href="#!/transactionList">Transactoin List</a></li>
+              </ul>
+            </li>
+            <li class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown">Example App <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="#!/userList">User List</a></li>
+                <li><a href="#!/addUser">Add User</a></li>
+                <li><a href="#!/verifyBalance">Verify Balance</a></li>
+                <li><a href="#!/transfer">Transfer</a></li>
+                <li><a href="#!/delUser">Delete User</a></li>
+              </ul>
+            </li>
+    <!--        <li><a href="#">Help</a></li>    -->
           </ul>
         </div>
       </div>
@@ -54,6 +72,7 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
+            <li><h3> Blockchain </h3></li>
             <li><a href="#!/overview">Overview <span class="sr-only">(current)</span></a></li>
             <li><a href="#!/chainStats">Chain Stats</a></li>
             <li><a href="#!/blockDetails">Block Details</a></li>
@@ -61,7 +80,7 @@
             <li><a href="#!/transactionList">Transactoin List</a></li>
           </ul>
           <ul class="nav nav-sidebar">
-            <li><a href="">Chaincode</a></li>
+            <li><h3>Example Application</h3></li>
             <li><a href="#!/userList">User List</a></li>
             <li><a href="#!/addUser">Add User</a></li>
             <li><a href="#!/verifyBalance">Verify Balance</a></li>
