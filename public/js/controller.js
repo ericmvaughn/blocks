@@ -100,7 +100,8 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
   };
 });
 
-myApp.controller('userListCtrl', ['$scope', '$http', '$window', function($scope, $http, $window) {
+myApp.controller('userListCtrl', ['$scope', '$http', '$window',
+  function($scope, $http, $window) {
   console.log('calling the userList endpoint');
 
   $scope.update = function() {
@@ -113,7 +114,7 @@ myApp.controller('userListCtrl', ['$scope', '$http', '$window', function($scope,
     }, function(response) {
       console.log('an error happened on getting the user list');
       console.log(response.data);
-      $window.alert("Error getting the user list." + response.data);
+      $window.alert('Error getting the user list. ' + response.data);
     });
   };
   $scope.update();  //running this function to populate the list on the initial load
@@ -178,7 +179,7 @@ myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http) {
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert("Error with Add." + response.data);
+      $window.alert('Error with Add. ' + response.data);
     });
   };
 }]).directive('addUser', function() {
@@ -204,7 +205,7 @@ myApp.controller('verifyBalanceCtrl',
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert("Error doing verify: " + response.data);
+      $window.alert('Error doing verify: ' + response.data);
     });
   };
 }]).directive('verifyBalance', function() {
@@ -230,7 +231,7 @@ myApp.controller('delUserCtrl', ['$scope', '$http', function($scope, $http) {
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert("Error doing delete: " + response.data);
+      $window.alert('Error doing delete: ' + response.data);
     });
   };
 }]).directive('delUser', function() {
@@ -260,7 +261,7 @@ myApp.controller('transferCtrl', ['$scope', '$http', function($scope, $http) {
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert("Error doing transfer: " + response.data);
+      $window.alert('Error doing transfer: ' + response.data);
     });
   };
 }]).directive('transfer', function() {
