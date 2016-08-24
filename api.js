@@ -306,7 +306,7 @@ app.post('/addUser', function(req, res) {
     // Invoke transaction submission failed
     debug(err);
     console.log('Failed to invoke addUser: ' + err.msg);
-    res.send(err.msg);
+    res.status(500).send(err.msg);
   });
 });
 
@@ -338,7 +338,7 @@ app.post('/verifyBalance', function(req, res) {
   queryTx.on('error', function(err) {     // Query failed
     debug(err);
     console.log('Failed to query existing chaincode state:  ', err.msg);
-    res.send('Error: ' + err.msg);
+    res.status(500).send(err.msg);
   });
 });
 
@@ -364,7 +364,7 @@ app.post('/transfer', function(req, res) {
     // Invoke transaction submission failed
     debug(err);
     console.log('Failed to invoke the transfer: ' + err.msg);
-    res.send(err.msg);
+    res.status(500).send(err.msg);
   });
 });
 
@@ -391,7 +391,7 @@ app.post('/delUser', function(req, res) {
     // Invoke transaction submission failed
     debug(err);
     console.log('Failed to invoke the delUser: ' + err.msg);
-    res.send(err.msg);
+    res.status(500).send(err.msg);
   });
 });
 
@@ -448,8 +448,8 @@ app.get('/chain', function(req, res) {
     console.log(response);
     console.log('Error path: There was an error getting the chain_stats:',
                 response.status.code, response.entity.Error);
-    res.send('Error path: There was an error getting the chain stats.  ' +
-              response.entity.Error);
+    res.status(response.status.code).send('Error path: There was an error getting the chain stats.  ' +
+              response.entity);
   });
 });
 

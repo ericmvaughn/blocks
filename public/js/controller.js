@@ -3,11 +3,14 @@ var myApp = angular.module('myApp', ['ngRoute']);
 //var baseUrl = 'http://localhost:5000';
 var baseUrl = '.';
 
-myApp.controller('chainCtrl', ['$scope', '$http', function($scope, $http) {
+myApp.controller('chainCtrl', ['$scope', '$http', '$window',
+  function($scope, $http, $window) {
   console.log('Chain Controller');
-  $http.get(baseUrl + '/chain').success(function(response) {
+  $http.get(baseUrl + '/chain').then(function(response) {
     console.log('got chain_stats');
-    $scope.chainStats = response;
+    $scope.chainStats = response.data;
+  }, function(response) {
+    $window.alert(response.data);
   });
 }]).directive('chainStats', function() {
   return {
@@ -100,11 +103,14 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
   };
 });
 
-myApp.controller('userListCtrl', ['$scope', '$http', '$window',
-  function($scope, $http, $window) {
+myApp.controller('userListCtrl', ['$scope', '$http', function($scope, $http) {
   console.log('calling the userList endpoint');
 
   $scope.update = function() {
+    //clear out old alerts
+    $scope.showAlert = false;
+    $scope.alertMsg = '';
+
     $http.get(baseUrl + '/userList').then(function(response) {
       console.log(response.data);
       $scope.userList = angular.fromJson(response.data);
@@ -114,7 +120,8 @@ myApp.controller('userListCtrl', ['$scope', '$http', '$window',
     }, function(response) {
       console.log('an error happened on getting the user list');
       console.log(response.data);
-      $window.alert('Error getting the user list. ' + response.data);
+      $scope.showErrorAlert = true;
+      $scope.alertErrorMsg = response.data;
     });
   };
   $scope.update();  //running this function to populate the list on the initial load
@@ -143,6 +150,12 @@ myApp.controller('userListCtrl', ['$scope', '$http', '$window',
   };
 });
 
+myApp.directive('transactionAlerts', function() {
+  return {
+    templateUrl: 'templates/transactionAlerts.html'
+  };
+});
+
 myApp.directive('overview', function() {
   return {
     templateUrl: 'templates/overview.html'
@@ -168,18 +181,28 @@ myApp.controller('addUserCtrl', ['$scope', '$http', function($scope, $http) {
       'amount': $scope.amount
     };
     // clear out the input data -- not sure if this is the correct way
-    $scope.newUser = '';
-    $scope.amount = '';
+    //  Let's leave the user input visable to how that looks
+    // $scope.newUser = '';
+    // $scope.amount = '';
+    // But let's clear the old alert measages
+    $scope.showAlert = false;
+    $scope.alertMsg = '';
+    $scope.showErrorAlert = false;
+    $scope.showErrorMsg = '';
+
     $http.post(baseUrl + '/addUser', data).then(function(response) {
       console.log('response from the addUser post ');
       console.log(response);
       if (response.data) {
         console.log(response.data);
+        $scope.showAlert = true;
+        $scope.alertMsg = response.data;
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert('Error with Add. ' + response.data);
+      $scope.showErrorAlert = true;
+      $scope.alertErrorMsg = response.data;
     });
   };
 }]).directive('addUser', function() {
@@ -196,16 +219,25 @@ myApp.controller('verifyBalanceCtrl',
       'name': $scope.user,
       'balance': $scope.balance
     };
+    // clear the old alert measages before posting a new request
+    $scope.showAlert = false;
+    $scope.alertMsg = '';
+    $scope.showErrorAlert = false;
+    $scope.showErrorMsg = '';
+
     $http.post(baseUrl + '/verifyBalance', data).then(function(response) {
       console.log('response from the verifyBalance post ');
       console.log(response);
-      if (response.data !== null) {
+      if (response.data) {
         $scope.result = response.data;
+        $scope.showAlert = true;
+        $scope.alertMsg = response.data;
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert('Error doing verify: ' + response.data);
+      $scope.showErrorAlert = true;
+      $scope.alertErrorMsg = response.data;
     });
   };
 }]).directive('verifyBalance', function() {
@@ -221,17 +253,26 @@ myApp.controller('delUserCtrl', ['$scope', '$http', function($scope, $http) {
       'name': $scope.delUser
     };
     // clear out the input data -- not sure if this is the correct way
-    $scope.delUser = '';
+    //$scope.delUser = '';
+    // clear the old alert measages before posting a new request
+    $scope.showAlert = false;
+    $scope.alertMsg = '';
+    $scope.showErrorAlert = false;
+    $scope.showErrorMsg = '';
+
     $http.post(baseUrl + '/delUser', data).then(function(response) {
       console.log('response from the delUser post ');
       console.log(response);
-      if (response.data.result !== null) {
-        console.log(response.data.result);
+      if (response.data) {
+        console.log(response.data);
+        $scope.showAlert = true;
+        $scope.alertMsg = response.data;
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert('Error doing delete: ' + response.data);
+      $scope.showErrorAlert = true;
+      $scope.alertErrorMsg = response.data;
     });
   };
 }]).directive('delUser', function() {
@@ -249,19 +290,28 @@ myApp.controller('transferCtrl', ['$scope', '$http', function($scope, $http) {
       'amount': $scope.amount
     };
     // clear out the input data -- not sure if this is the correct way
-    $scope.fromUser = '';
-    $scope.toUser = '';
-    $scope.amount = '';
+    // $scope.fromUser = '';
+    // $scope.toUser = '';
+    // $scope.amount = '';
+    // clear the old alert measages before posting a new request
+    $scope.showAlert = false;
+    $scope.alertMsg = '';
+    $scope.showErrorAlert = false;
+    $scope.showErrorMsg = '';
+
     $http.post(baseUrl + '/transfer', data).then(function(response) {
       console.log('response from the transfer post ');
       console.log(response);
       if (response.data) {
         console.log(response.data);
+        $scope.showAlert = true;
+        $scope.alertMsg = response.data;
       }
     }, function(response) {
       console.log('an error happened on the $http.post');
       console.log(response.data);
-      $window.alert('Error doing transfer: ' + response.data);
+      $scope.showErrorAlert = true;
+      $scope.alertErrorMsg = response.data;
     });
   };
 }]).directive('transfer', function() {
