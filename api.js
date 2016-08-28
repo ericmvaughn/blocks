@@ -308,6 +308,9 @@ app.post('/addUser', function(req, res) {
     console.log('Failed to invoke addUser: ' + err.msg);
     res.status(500).send(err.msg);
   });
+  invokeTx.on('complete', function(results) {
+    console.log('The completion results for /addUser %j', results.result);
+  });
 });
 
 app.post('/verifyBalance', function(req, res) {
@@ -366,6 +369,9 @@ app.post('/transfer', function(req, res) {
     console.log('Failed to invoke the transfer: ' + err.msg);
     res.status(500).send(err.msg);
   });
+  invokeTx.on('complete', function(results) {
+    console.log('The completion results for /transfer %j', results.result);
+  });
 });
 
 app.post('/delUser', function(req, res) {
@@ -392,6 +398,9 @@ app.post('/delUser', function(req, res) {
     debug(err);
     console.log('Failed to invoke the delUser: ' + err.msg);
     res.status(500).send(err.msg);
+  });
+  invokeTx.on('complete', function(results) {
+    console.log('The completion results for /delUser %j', results.result);
   });
 });
 
