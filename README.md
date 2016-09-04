@@ -55,8 +55,12 @@ Once this completes login to the vagrant image.
 `vagrant ssh`
 If fabric hasn't be built yet then do the following.
 ```
-cd /hyperledger/
-go build
+cd /hyperledger
+make all
+
+make membersrvc
+
+make peer
 ```
 Next start the member services.
 ```
@@ -67,7 +71,7 @@ export MEMBERSRVC_CA_ACA_ENABLED=true
 In the second window start a validating peer.
 ```
 cd $GOPATH/src/github.com/hyperledger/fabric/devenv/
-vagrant ss
+vagrant ssh
 cd /hyperledger/
 export CORE_SECURITY_ENABLED=true
 export CORE_SECURITY_PRIVACY=true
