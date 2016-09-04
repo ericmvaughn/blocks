@@ -1,4 +1,6 @@
-# Example App
+# Example App for Hyperledger version 0.5
+
+## Note: This branch is compatable with the 0.5 version of fabric.
 
 This project is an example app demonstrating some of the Hyperledger/fabric
 capabilities.  This app uses both the Node.js SDK and the REST interface.  The
