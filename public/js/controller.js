@@ -10,7 +10,10 @@ myApp.controller('chainCtrl', ['$scope', '$http', '$window',
     console.log('got chain_stats');
     $scope.chainStats = response.data;
   }, function(response) {
-    $window.alert(response.data);
+    //$window.alert(response.data);
+    $scope.showErrorAlert = true;
+    $scope.alertErrorMsg = response.data;
+
   });
 }]).directive('chainStats', function() {
   return {
