@@ -24,7 +24,10 @@ var util = require('./util.js');
 //var ByteBuffer = require("bytebuffer");
 //var hexy = require('hexy');
 var Q = require('q');
-var hlc = require('hfc');
+// var hlc = require('hfc');
+// jscs:disable maximumLineLength
+var hlc = require('C:/Users/Eric/Documents/Projects/BlockChain/go/src/github.com/hyperledger/fabric/sdk/node/');
+// jscs:enable maximumLineLength
 var debug = require('debug')('blocks');
 var rest = require('rest');
 var mime = require('rest/interceptor/mime');
@@ -41,14 +44,16 @@ user1 = {
   name: 'WebApp_user1',
   role: 1, // Client
   account: 'bank_a',
-  affiliation: '00001'
+  affiliation: 'bank_a'
+  //affiliation: '00001'  //bluemix
 };
 
 var userMember1;
 
 // Path to the local directory containing the chaincode project under $GOPATH
-//var chaincodePath = 'github.com/blocks_chaincode/';  //local config
-var chaincodePath = 'github.com/blocks_cc/';  // bluemix config
+var chaincodePath = 'github.com/blocks_chaincode/';  //local config
+// var chaincodePath = 'github.com/blocks_cc/';  // bluemix config
+// var chaincodePath = 'github.com/gerrit/fabric/examples/chaincode/go/chaincode_example02';
 
 var chaincodeID;
 
@@ -64,8 +69,8 @@ var chain = hlc.newChain('targetChain');
 // Configure the KeyValStore which is used to store sensitive keys
 // as so it is important to secure this storage.
 // The FileKeyValStore is a simple file-based KeyValStore.
-// chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
-chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/bluemixKeyValStore'));
+chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/keyValStore'));
+// chain.setKeyValStore(hlc.newFileKeyValStore('./tmp/bluemixKeyValStore'));
 var store = chain.getKeyValStore();
 
 store.getValue('chaincodeID', function(err, value) {
@@ -79,12 +84,12 @@ store.getValue('chaincodeID', function(err, value) {
 
 // jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 // load bluemix credentials from file-based
-var cred = require('./cred-blockchain-ma.json');
-var grpc = 'grpcs://';
+// var cred = require('./cred-blockchain-ma.json');
+// var grpc = 'grpcs://';
 
 //  local config no TLS
-// var cred = require('./cred-local.json');
-// var grpc = 'grpc://';
+var cred = require('./cred-local.json');
+var grpc = 'grpc://';
 
 // URL for the REST interface to the peer
 //var restUrl = 'http://localhost:5000';
@@ -98,7 +103,7 @@ debug(caName);
 debug(grpc + ca.url);
 var cert;
 // the next line was recommended in issue #2373
-chain.setECDSAModeForGRPC(true);
+// chain.setECDSAModeForGRPC(true);  //may not be needed anymore
 
 if (fs.existsSync('us.blockchain.ibm.com.cert')) {
   debug('found cert');
@@ -150,41 +155,41 @@ chain.enroll('WebAppAdmin', credUser.secret, function(err, webAppAdmin) {
   //debug(webAppAdmin);
 
   //  For bluemix use an already defined user and just call enroll
-  var user3 = cred.users[3];
-  chain.enroll(user3.enrollId, user3.enrollSecret, function(err, user) {
-    if (err) {
-      return console.log('user_type1 enroll error: ' + err);
-    }
-    if (user.isEnrolled()) {
-      userMember1 = user;
-      return;
-    }
-  });
-  // the code below is used to register and enroll a user for the local config
-  // chain.getUser(user1.name, function(err, user) {
+  // var user3 = cred.users[3];
+  // chain.enroll(user3.enrollId, user3.enrollSecret, function(err, user) {
   //   if (err) {
-  //     return console.log('getUser error: ' + err);
+  //     return console.log('user_type1 enroll error: ' + err);
   //   }
   //   if (user.isEnrolled()) {
   //     userMember1 = user;
   //     return;
   //   }
-  //   debug(user);
-  //   // User is not enrolled yet, so perform both registration and enrollment
-  //   var registrationRequest = {
-  //     registrar: 'WebAppAdmin',
-  //     enrollmentID: user1.name,
-  //     //role: user1.role, // Client
-  //     account: user1.account,
-  //     affiliation: user1.affiliation
-  //   };
-  //   user.registerAndEnroll(registrationRequest, function(err) {
-  //     if (err) {
-  //       return console.log('registerAndEnroll error: ' + err);
-  //     }
-  //     userMember1 = user;
-  //   });
   // });
+  // the code below is used to register and enroll a user for the local config
+  chain.getUser(user1.name, function(err, user) {
+    if (err) {
+      return console.log('getUser error: ' + err);
+    }
+    if (user.isEnrolled()) {
+      userMember1 = user;
+      return;
+    }
+    debug(user);
+    // User is not enrolled yet, so perform both registration and enrollment
+    var registrationRequest = {
+      registrar: 'WebAppAdmin',
+      enrollmentID: user1.name,
+      //role: user1.role, // Client
+      account: user1.account,
+      affiliation: user1.affiliation
+    };
+    user.registerAndEnroll(registrationRequest, function(err) {
+      if (err) {
+        return console.log('registerAndEnroll error: ' + err);
+      }
+      userMember1 = user;
+    });
+  });
 });
 
 app.use(morgan('dev'));
@@ -205,8 +210,9 @@ app.get('/deploy', function(req, res) {
   var deployRequest = {
     fcn: 'init',
     args: ['a', initA, 'b', initB],
-    certificatePath: '/certs/blockchain-cert.pem'  //added for bluemix
+    //certificatePath: '/certs/blockchain-cert.pem'  //added for bluemix
   };
+  debug('Deployment request %j ', deployRequest);
 
   deployRequest.chaincodePath = chaincodePath;
 
@@ -229,13 +235,17 @@ app.get('/deploy', function(req, res) {
     console.log('chaincodeID: ' + chaincodeID);
     debug('Successfully deployed chaincode: request/response ' +
           deployRequest + results);
+    debug(results);
+    res.json(results);
   });
   deployTx.on('error', function(err) {
     // Deploy request failed
     console.log('there was an error deploying the chaincode ' + err);
-    debug('Failed to deploy chaincode: request/error ' + deployRequest + err);
+    debug('Failed to deploy chaincode: request/error %j ', err);
+    debug(err);
+    res.json(err);
   });
-  res.send('Chaincode deployed ' + deployRequest);
+  //res.send('Chaincode deployed ' + deployRequest);
 });
 
 app.get('/member', function(req, res) {
@@ -456,8 +466,9 @@ app.get('/chain', function(req, res) {
   }, function(response) {
     console.log(response);
     console.log('Error path: There was an error getting the chain_stats:',
-                response.status.code, response.entity.Error);
-    res.status(response.status.code).send('Error path: There was an error getting the chain stats.  ' +
+                response.status.code, response.entity);
+    res.status(response.status.code)
+       .send('Error path: There was an error getting the chain stats.  ' +
               response.entity);
   });
 });
