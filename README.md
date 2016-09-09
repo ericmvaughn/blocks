@@ -52,16 +52,23 @@ cd $GOPATH/src/github.com/hyperledger/fabric/devenv/
 vagrant up
 ```
 Once this completes login to the vagrant image.
-`vagrant ssh`
-If fabric hasn't be built yet then do the following.
 ```
-cd /hyperledger
-make all
-
-make membersrvc
-
-make peer
+vagrant ssh
 ```
+#### Initial Installation
+>  If fabric hasn't be built yet then do the following.
+  ```
+  cd /hyperledger
+  make all
+  ```
+  Delete the block chain created during the build process
+  ```
+  rm -r /var/hyperledger/production/
+  ```
+  Also delete the files under `tmp/keyValStore` in the blocks source directory.
+  Note: Only delete these files the first time you run or anytime you delete the
+  `/var/hyperledger/production` directory in vagrant.
+
 Next start the member services.
 ```
 cd /hyperledger/
@@ -85,6 +92,58 @@ in.
 
 At this point you can connect from a browser using `http://localhost:3000`
 
+## Manually deploy the chaincode
+Until the SDK deploy function is working use the REST interface to deploy
+the chaincode from the Github repository.  The postman app works well for this.
+
+First step is to register one of the users defined in the membersrvc.yaml file.
+```
+POST http://localhost:7050/registrar
+
+BODY
+{
+      "enrollId": "jim",
+      "enrollSecret": "6avZQLwcUe9b"
+}
+
+
+POST  http://localhost:7050/chaincode
+
+body
+{
+  "jsonrpc": "2.0",
+  "method": "deploy",
+  "params": {
+    "type": 1,
+    "chaincodeID":{
+        "path":"https://github.com/ericmvaughn/blocks_chaincode"
+    },
+    "ctorMsg": {
+        "function":"init",
+        "args":["a", "1000", "b", "2000"]
+    },
+    "secureContext": "jim"
+  },
+  "id": "1"  
+}
+
+results
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "status": "OK",
+    "message": "77dcb5e38265da1ef3f51edee25b3612085bcbd26262da4236da5ceb4387a655a3c60476c4aed35e1ca78dcdb6417a7e4c88965aa88ffa39878c7c8bde2a0772"
+  },
+  "id": "1"
+}
+
+```
+
+The message value in the results contains the chaincode ID that needs to be saved
+in the `tmp/keyValStore/chaincodeID` file.
+
+**NOTE:** A restart of node may be required at this point.
+
 ## Testing
 To run both the linter and code style checker run `gulp` with no parameters.
 
@@ -95,7 +154,8 @@ capabilities run `gulp test`.
 This project was based heavily on the IBM Marbles example and the Hyperledger
  [fabric](https://github.com/hyperledger/fabric) project.
 
- ###### Markdown formatting examples
+
+##### Markdown formatting examples
  1.  You can put stars on both ends of a word to make it *italics* or
  2.  Two stars to make it **bold**
  3.  Create links to headers with the document like [this](#Setting-up-testing-blockchain)
