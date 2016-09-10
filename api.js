@@ -477,9 +477,13 @@ app.get('/chain/blocks/:id', function(req, res) {
   console.log('Get a block by ID: ' + req.params.id);
   restClient(restUrl + '/chain/blocks/' + req.params.id)
   .then(function(response) {
-    debug(response.entity);
+    // debug(response.entity);
     var block = util.decodeBlock(response.entity);
-    res.json(block);
+    if (block) {
+      res.json(block);
+    } else {
+      res.json(response.entity);
+    }
   }, function(response) {
     console.log(response);
     console.log('Error path: There was an error getting the block_stats:',
@@ -528,14 +532,18 @@ app.get('/chain/transactionList/:id', function(req, res) {
   var count = 0;
   var len = blockList.length;
   var findUUID = function(r) {
-    return r.uuid === transaction.uuid;
+    return r.txid === transaction.txid;
   };
   for (var i = 0; i < len && count < req.params.id; i++) {
     var block = blockList[i].block;
+    if (!block.transactions) {  // skip blocks with no transactions
+      continue;
+    }
     var transLen = block.transactions.length;
     for (var j = 0; j < transLen; j++) {
       var transaction = block.transactions[j];
-      var result = block.nonHashData.transactionResults.find(findUUID);
+      // var result = block.nonHashData.transactionResults.find(findUUID);
+      var result = 'TBD';   //TODO figure out the results of the new format
       list.push({transaction: transaction, result: result});
       count++;
     }
@@ -553,7 +561,7 @@ app.get('/userHistory/:user', function(req, res) {
   var balance = 0;
   var user = req.params.user;
   var findUUID = function(r) {
-    return r.uuid === tx.uuid;
+    return r.txid === tx.txid;
   };
   var findUser = function(r) {
     return r.payload.chaincodeSpec.ctorMsg.args.indexOf(user) > -1;
@@ -562,9 +570,10 @@ app.get('/userHistory/:user', function(req, res) {
     var block = blockList[i].block;
     var transLen = block.transactions.length;
     for (var j = 0; j < transLen; j++) {
-      if (findUser(block.transactions[j])) {
+      if (block.transactions[j].payload && findUser(block.transactions[j])) {
         var tx = block.transactions[j];
-        var result = block.nonHashData.transactionResults.find(findUUID);
+        //var result = block.nonHashData.transactionResults.find(findUUID);
+        var result = 'TBD';
         var newBalance = util.calcBalance(tx, result, user, balance);
         list.push({transaction: tx, result: result, balance: newBalance});
         balance = newBalance;

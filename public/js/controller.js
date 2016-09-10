@@ -78,11 +78,16 @@ myApp.controller('blockListCtrl', ['$scope', '$http', function($scope, $http) {
 });
 
 myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
-  $http.get(baseUrl + '/chain').success(function(response) {
-    $scope.blockID = response.height - 1;
+  $http.get(baseUrl + '/chain').then(function(response) {
+    console.log(response);
+    $scope.blockID = response.data.height - 1;
+    console.log('The blockID is ' + $scope.blockID);
     getBlock($scope.blockID);
+  }, function functionName(response) {
+    console.log('Failed to get the chain height using /chain');
+    $scope.showErrorAlert = true;
+    $scope.alertErrorMsg = response.data;
   });
-  console.log('The blockID is ' + $scope.blockID);
 
   $scope.change = function() {
     var id = $scope.blockID;
@@ -91,9 +96,8 @@ myApp.controller('blockCtrl', ['$scope', '$http', function($scope, $http) {
   };
   function getBlock(id) {
     $http.get(baseUrl + '/chain/blocks/' + id).success(function(response) {
-      //console.log("print with JSON.stringify");
+      // console.log(response);
       $scope.block = response;
-      //$scope.block = angular.toJson(response, 4);
     });
     $http.get(baseUrl + '/payload/' + id).success(function(response) {
       $scope.payload = angular.toJson(response, 4);

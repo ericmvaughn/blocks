@@ -1,8 +1,12 @@
 var debug = require('debug')('blocks');
 var ProtoBuf = require('protobufjs');
 
-var builder = ProtoBuf.loadProtoFile(
-              './node_modules/hfc/lib/protos/fabric.proto');    // Creates the Builder
+// use the hfc protos once hfc has been released for fabric 0.6
+// var builder = ProtoBuf.loadProtoFile(
+//               './node_modules/hfc/lib/protos/fabric.proto');    // Creates the Builder
+// jscs:disable maximumLineLength
+var builder = ProtoBuf.loadProtoFile('C:/Users/Eric/Documents/Projects/BlockChain/go/src/github.com/hyperledger/fabric/sdk/node/lib/protos/fabric.proto');
+// jscs:enable maximumLineLength
 var PROTOS = builder.build('protos');                            // Returns just the 'js' namespace if that's all we need
 var rest = require('rest');
 var mime = require('rest/interceptor/mime');
@@ -17,21 +21,78 @@ var Q = require('q');
 
 var decodePayload = function(transaction) {
   var payload;
-  try {
-    payload = PROTOS.ChaincodeInvocationSpec.decode64(transaction.payload);
-  } catch (e) {
-    if (e.decoded) { // Truncated
-      console.log('payload was truncated');
-      payload = e.decoded;
-    } else {  // General error
-      console.log('Protobuf decode failed ' + e);
+
+  switch (transaction.type) {
+    case 'CHAINCODE_DEPLOY':
+    case 1:
+      try {
+        var toVal = transaction.toValidators;
+        payload = PROTOS.ChaincodeDeploymentSpec.decode64(toVal);
+      } catch (e) {
+        if (e.decoded) { // Truncated
+          console.log('payload was truncated');
+          payload = e.decoded;
+        } else {  // General error
+          console.log('Protobuf decode failed returning orig =====> ' + e);
+          payload = transaction.payload;
+        }
+      }
+      break;
+    case 'CHAINCODE_INVOKE':
+    case 2:
+      try {
+        payload = PROTOS.ChaincodeInvocationSpec.decode64(transaction.payload);
+      } catch (e) {
+        if (e.decoded) { // Truncated
+          console.log('payload was truncated');
+          payload = e.decoded;
+        } else {  // General error
+          console.log('Protobuf decode failed returning orig =====> ' + e);
+          payload = transaction.payload;
+        }
+      }
+      break;
+    default:
+      payload = transaction.payload;
+
+  }
+
+  //console.log('Transacation type ' + transaction.type);
+  // console.log('Payload -- ', payload);
+  // if (payload && payload.chaincodeSpec) {
+  //   console.log('Payload args -- ', payload.chaincodeSpec.ctorMsg.args[1].toString());
+  //
+  //   // console.log('Is bytebuffer  ', ByteBuffer.isByteBuffer(payload.chaincodeSpec.ctorMsg.args[0]));
+  //   // var bb = ByteBuffer();
+  //   // bb = payload.chaincodeSpec.ctorMsg.args[0];
+  //   payload.chaincodeSpec.ctorMsg.args[0].printDebug();
+  //   payload.chaincodeSpec.ctorMsg.args[1].printDebug();
+  //   console.log('payload bytebuffer  ', payload.chaincodeSpec.ctorMsg.args[0].toArrayBuffer().toString());
+  //   var input = payload.chaincodeSpec.ctorMsg.args;
+  //   var output = [];
+  //   for (var i = 0; i < input.length; i++) {
+  //     console.log(input[i].toBuffer().toString());
+  //     output.push(input[i].toBuffer().toString());
+  //   }
+  //   console.log(output);
+  // }
+
+  if (payload && payload.chaincodeSpec) {
+    var input = payload.chaincodeSpec.ctorMsg.args;
+    var output = [];
+    for (var i = 0; i < input.length; i++) {
+      output.push(input[i].toBuffer().toString());
     }
+    payload.chaincodeSpec.ctorMsg.args = output;
   }
   return payload;
 };
 
 var decodeChaincodeID = function(transaction) {
   var id;
+  if (!transaction.chaincodeID) {
+    return 'chaincodeID not found';
+  }
   try {
     id = PROTOS.ChaincodeID.decode64(transaction.chaincodeID);
   } catch (e) {
@@ -39,7 +100,9 @@ var decodeChaincodeID = function(transaction) {
       console.log('ChaincodeID was truncated');
       id = e.decoded;
     } else {  // General error
-      console.log('Protobuf decode failed ' + e);
+      console.log('decodeChaincodeID: Protobuf decode failed ' + e);
+      id = transaction.chaincodeID;
+      console.log(id);
     }
   }
   return id;
@@ -57,13 +120,18 @@ var decodeType = function(transaction) {
 
 var decodeBlock = function(block) {
   var newBlock = block;
+  if (!block.transactions) {
+    return block;
+  }
   var len = block.transactions.length;
   for (var i = 0; i < len; i++) {
     newBlock.transactions[i].type = decodeType(block.transactions[i]);
     newBlock.transactions[i].chaincodeID =
       decodeChaincodeID(block.transactions[i]);
-    newBlock.transactions[i].payload =
-      decodePayload(block.transactions[i]);
+    if (newBlock.transactions[i].payload) {
+      newBlock.transactions[i].payload =
+        decodePayload(block.transactions[i]);
+    }
   }
   return newBlock;
 };
@@ -85,9 +153,10 @@ var updateChain = function(height) {
 var getFormattedBlock = function(id) {
   return restClient(restUrl + '/chain/blocks/' + id)
   .then(function(response) {
-    debug(response);
+    debug('getFormattedBlock: got block ' + id);
     var value = response.entity;
     value = decodeBlock(value);
+    debug(value);
     return {id: id, block: value};
   });
 };
@@ -139,21 +208,21 @@ var calcBalance = function(transaction, result, user, oldBalance) {
   if (result.errorCode || ctorMsg.args.indexOf(user) == -1) {  //check for an error
     return oldBalance;
   }
-  switch (ctorMsg.function) {
+  switch (ctorMsg.args[0]) {
     case 'init':
       newBalance = ctorMsg.args[ctorMsg.args.indexOf(user) + 1];
       break;
     case 'new':
-      newBalance = ctorMsg.args[1];
+      newBalance = ctorMsg.args[2];
       break;
     case 'delete':
       newBalance = 0;
       break;
     case 'transfer':
-      if (ctorMsg.args.indexOf(user) === 0) {
-        newBalance = Number(oldBalance) - Number(ctorMsg.args[2]);
+      if (ctorMsg.args.indexOf(user) === 1) {
+        newBalance = Number(oldBalance) - Number(ctorMsg.args[3]);
       } else {
-        newBalance = Number(oldBalance) + Number(ctorMsg.args[2]);
+        newBalance = Number(oldBalance) + Number(ctorMsg.args[3]);
       }
       break;
     default:
